@@ -17,10 +17,12 @@
 ## 怎么用
 
 1. 安装这个 skill。
-2. 先按三层结构搭建记忆：`MEMORY.md`、每日笔记、Obsidian 归档。
+2. 先复制 `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`，再配合 `MEMORY.md` 和每日笔记使用。
 3. 把稳定事实蒸馏进长期记忆，原始记录留在每日笔记里。
+4. 将稳定知识归档到 Obsidian。
 
 ## 包含文件
 
 - `SKILL.md`：技能契约与工作流
 - `INSTALL.md`：可直接发给 Agent 的安装指令
+- `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`：恢复模板

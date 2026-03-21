@@ -17,10 +17,12 @@ This skill explains how to build a durable memory stack for agents: a compact `M
 ## How to use
 
 1. Install the skill.
-2. Use the three-layer memory structure: `MEMORY.md`, daily notes, and Obsidian archive.
+2. Copy `templates/SESSION-STATE.md` and `templates/working-buffer.md`, then use them with `MEMORY.md` and daily notes.
 3. Distill stable facts into long-term memory and keep raw notes in daily files.
+4. Archive stable knowledge into Obsidian.
 
 ## Included files
 
 - `SKILL.md`: skill contract and workflow
 - `INSTALL.md`: a copy-paste installation prompt for agents
+- `templates/SESSION-STATE.md` and `templates/working-buffer.md`: recovery templates
