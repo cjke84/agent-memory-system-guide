@@ -9,6 +9,10 @@ An Agent long-term memory guide for OpenClaw and Obsidian workflows.
 This skill explains how to build a durable memory stack for agents: a compact `MEMORY.md`, daily notes, memory distillation, and Obsidian backups.
 OpenViking is an optional enhancement for semantic recall and summary support.
 
+## Optional enhancement
+
+OpenViking can be added later if you want semantic recall and summary support, but it is not required for the core workflow.
+
 ## Who it is for
 
 - Agents that need persistent memory
