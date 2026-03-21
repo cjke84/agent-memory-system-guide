@@ -36,3 +36,4 @@ OpenViking can be added later if you want semantic recall and summary support, b
 - `INSTALL.md`: a copy-paste installation prompt for agents
 - `README_EN.md` / `README_CN.md`: bilingual introductions
 - `templates/SESSION-STATE.md` and `templates/working-buffer.md`: recovery templates
+- `templates/OBSIDIAN-NOTE.md`: Obsidian note template (frontmatter, links, embeds)
