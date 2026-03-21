@@ -116,6 +116,13 @@ memory_search(query="相关关键词")
 - 中断后恢复：优先从 `working-buffer.md` 续接未完成项
 - 仓库模板：先复制 `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`，再填入当前任务
 
+## OpenViking 可选增强
+
+- OpenViking 不是强依赖；没有它也能完成核心的断点续接流程
+- 有 OpenViking 时，优先把它作为语义召回和摘要补全层
+- OpenViking 负责补充相关记忆，`SESSION-STATE.md` 负责保存当前任务真相
+- 如果 OpenViking 不可用，直接退回到 `SESSION-STATE.md` + `working-buffer.md` + daily notes 的本地流程
+
 ## 维护原则
 
 - 下次对话会用到的 → 保留在本地记忆
@@ -126,4 +133,5 @@ memory_search(query="相关关键词")
 
 - OpenClaw-compatible skill
 - Codex-compatible skill
+- OpenViking-compatible optional enhancement
 - Obsidian vault workflows

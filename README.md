@@ -11,6 +11,7 @@
 ## What it is
 
 An Agent long-term memory guide for OpenClaw and Obsidian workflows.
+OpenViking is an optional enhancement for semantic recall and summary support.
 
 ## Who it is for
 
