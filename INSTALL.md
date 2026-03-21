@@ -7,3 +7,5 @@ Please install agent-memory-system-guide as a usable skill. Keep SKILL.md, READM
 ```text
 请把 agent-memory-system-guide 安装成可用 skill。保留 SKILL.md、README、templates（包括 `templates/OBSIDIAN-NOTE.md`）和相关文档；保持 skill 名称与仓库一致；确认它可在 OpenClaw 和 Codex 中使用；把 OpenViking 视为可选增强而不是硬依赖；路径或环境变量优先遵循仓库说明。
 ```
+
+Latest release: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
