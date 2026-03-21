@@ -2,29 +2,30 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Introductions
+## Start Here
 
 - [English README](README_EN.md)
 - [中文介绍](README_CN.md)
 - [Install Skill for Agent](INSTALL.md)
 
-## Skill
-
-OpenClaw-compatible skill. Codex-compatible skill.
-
 ## What it is
 
-A guide for building an Agent long-term memory system with a practical, Obsidian-friendly workflow.
+An Agent long-term memory guide for OpenClaw and Obsidian workflows.
+
+## Who it is for
+
+- Agents that need persistent memory
+- Agents that should keep daily notes and distill stable facts
+- Users who want Obsidian as the long-term archive
 
 ## Quick start
 
-- Send the skill to an agent that needs persistent memory.
-- Follow the `MEMORY.md` three-layer structure.
-- Keep daily notes as raw records and distill them into long-term memory.
-- Back up the memory workspace into Obsidian for long-term storage.
+1. Install the skill.
+2. Use the three-layer memory structure: `MEMORY.md`, daily notes, and Obsidian archive.
+3. Distill stable facts into long-term memory and keep raw notes in daily files.
 
 ## Files
 
 - `SKILL.md`: skill contract and workflow
-- `INSTALL.md`: a short prompt you can send to an agent
+- `INSTALL.md`: a copy-paste installation prompt for agents
 - `README_EN.md` / `README_CN.md`: bilingual introductions
