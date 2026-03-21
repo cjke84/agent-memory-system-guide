@@ -4,6 +4,8 @@
 
 面向 OpenClaw 和 Obsidian 工作流的 Agent 长期记忆搭建指南。
 
+最新发布：[v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+
 ## 是什么
 
 这个 skill 说明如何给 Agent 搭建长期记忆：用精简的 `MEMORY.md`、每日笔记、记忆蒸馏和 Obsidian 备份组成一套稳定的记忆层。

@@ -4,6 +4,8 @@
 
 An Agent long-term memory guide for OpenClaw and Obsidian workflows.
 
+Latest release: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+
 ## What it is
 
 This skill explains how to build a durable memory stack for agents: a compact `MEMORY.md`, daily notes, memory distillation, and Obsidian backups.
