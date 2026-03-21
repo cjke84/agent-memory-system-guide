@@ -26,6 +26,11 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 3. 把稳定事实蒸馏进长期记忆，原始记录留在每日笔记里。
 4. 将稳定知识归档到 Obsidian。
 
+## Obsidian 原生笔记
+
+- 稳定知识建议用 `templates/OBSIDIAN-NOTE.md`：包含 YAML frontmatter、wikilink、embeds、attachments 约定。
+- 如果使用 Dataview，可以按 `type`、`status`、`tags`、`related` 做查询。
+
 ## 包含文件
 
 - `SKILL.md`：技能契约与工作流

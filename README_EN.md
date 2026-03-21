@@ -26,6 +26,11 @@ OpenViking can be added later if you want semantic recall and summary support, b
 3. Distill stable facts into long-term memory and keep raw notes in daily files.
 4. Archive stable knowledge into Obsidian.
 
+## Obsidian-native notes
+
+- Use `templates/OBSIDIAN-NOTE.md` for durable notes: YAML frontmatter, wikilinks, embeds, and attachment conventions.
+- With Dataview, you can query your notes by `type`, `status`, `tags`, and `related`.
+
 ## Included files
 
 - `SKILL.md`: skill contract and workflow

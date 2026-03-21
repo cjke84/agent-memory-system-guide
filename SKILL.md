@@ -116,6 +116,37 @@ memory_search(query="相关关键词")
 - `templates/OBSIDIAN-NOTE.md`：Obsidian 笔记模板（frontmatter / links / embeds）
 - Obsidian：长期归档与备份
 
+## Obsidian 原生约定（frontmatter / Dataview / wikilink / backlinks / embeds / attachments）
+
+当你把稳定知识写入 Obsidian 时，建议遵循下面这些约定，保证可检索、可回链、可复用。
+
+### frontmatter
+
+- 用 YAML frontmatter 固定结构化字段，便于后续查询、筛选、聚合
+- 推荐字段见 `templates/OBSIDIAN-NOTE.md`，核心是：`type`、`status`、`tags`、`related`
+
+### Dataview
+
+如果你使用 Dataview 插件，可以直接用 frontmatter 做查询，例如：
+
+```text
+TABLE type, status, tags, related
+FROM "memory"
+WHERE status != "archived"
+SORT updated desc
+```
+
+### wikilink / backlinks
+
+- 内部引用优先使用 wikilink：`[[SESSION-STATE]]`、`[[MEMORY]]`、`[[2026-03-21]]`
+- 同一概念尽量用同一标题或 aliases，backlinks 才会稳定聚合到一起
+
+### embeds / attachments
+
+- 图片：本地资源优先用 `![[image.png]]`，远程资源保留 `![alt](https://...)`
+- 引用证据：用 block quote，或用 block embeds `![[note#^block-id]]` 复用证据段
+- attachments 建议放在 vault 内可管理的位置（例如 `attachments/`），避免链接失效
+
 ## 启动与结束顺序
 
 - 启动时：先读 `SESSION-STATE.md`，再读最近 1-3 天 daily notes，最后才检索本地记忆
