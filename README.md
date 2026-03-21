@@ -7,6 +7,7 @@
 - [English README](README_EN.md)
 - [中文介绍](README_CN.md)
 - [Install Skill for Agent](INSTALL.md)
+- [Latest release: v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
 ## What it is
 
