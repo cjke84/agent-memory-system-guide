@@ -1,2 +1,7 @@
 __pycache__/
 .pytest_cache/
+.DS_Store
+.skillup-artifacts/
+.skillup-check.json
+.skillup-dryrun.json
+.skillup-publish.json

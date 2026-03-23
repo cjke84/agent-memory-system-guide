@@ -2,12 +2,19 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+GitHub repository: [cjke84/agent-memory-system-guide](https://github.com/cjke84/agent-memory-system-guide)
+
+English overview: This repository provides a practical Agent long-term memory workflow for OpenClaw and Codex. It combines a compact `MEMORY.md`, daily notes, session recovery files, and Obsidian archiving, with OpenViking as an optional enhancement rather than a hard dependency.
+
+Canonical OpenClaw skill id: `memory-system`
+
 ## Start Here
 
 - [English README](README_EN.md)
 - [中文介绍](README_CN.md)
 - [Install Skill for Agent](INSTALL.md)
-- [Latest release: v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+- GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+- Current published skill version: `1.0.7`
 
 ## What it is
 
@@ -34,7 +41,10 @@ OpenViking can be added later if you want semantic recall and summary support, b
 ## Files
 
 - `SKILL.md`: skill contract and workflow
+- `manifest.toml`: publish metadata for OpenClaw / ClawHub style release workflows
 - `INSTALL.md`: a copy-paste installation prompt for agents
 - `README_EN.md` / `README_CN.md`: bilingual introductions
 - `templates/SESSION-STATE.md` and `templates/working-buffer.md`: recovery templates
 - `templates/OBSIDIAN-NOTE.md`: Obsidian note template (frontmatter, links, embeds)
+
+Publish note: `manifest.toml` is the source of truth for skill versioning and the Xiaping skill id used for updates.

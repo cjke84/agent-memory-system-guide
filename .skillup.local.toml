@@ -1,0 +1,22 @@
+[defaults]
+platforms = "github,xiaping,openclaw,clawhub"
+artifact_dir = ".skillup-artifacts"
+result_file = ".skillup-publish.json"
+
+[github]
+enabled = true
+repo = "cjke84/agent-memory-system-guide"
+create_release = "true"
+auto_create_repo = "false"
+release_latest = "true"
+release_title_template = "{slug} v{version}"
+release_notes_template = "SkillUp release for {slug} version {version}."
+
+[xiaping]
+enabled = true
+
+[openclaw]
+enabled = true
+
+[clawhub]
+enabled = true

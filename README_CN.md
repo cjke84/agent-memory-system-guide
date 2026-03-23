@@ -2,9 +2,15 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+GitHub 仓库：[cjke84/agent-memory-system-guide](https://github.com/cjke84/agent-memory-system-guide)
+
+Canonical OpenClaw skill id：`memory-system`
+
 面向 OpenClaw 和 Obsidian 工作流的 Agent 长期记忆搭建指南。
 
-最新发布：[v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+GitHub 发布归档：[v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
+
+当前已发布 skill 版本：`1.0.7`
 
 ## 是什么
 
@@ -36,5 +42,8 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 ## 包含文件
 
 - `SKILL.md`：技能契约与工作流
+- `manifest.toml`：面向 OpenClaw / ClawHub 风格发布流程的元数据
 - `INSTALL.md`：可直接发给 Agent 的安装指令
 - `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`：恢复模板
+
+发布说明：后续版本号与虾评更新目标 `skill_id` 以 `manifest.toml` 为准。
