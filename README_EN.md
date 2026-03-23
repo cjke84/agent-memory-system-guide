@@ -12,7 +12,7 @@ It helps you build a durable memory stack with a compact `MEMORY.md`, daily note
 
 GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
-Current published skill version: `1.0.7`
+Current published skill version: `1.0.8`
 
 ## What it is
 
