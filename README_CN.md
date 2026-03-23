@@ -39,6 +39,7 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 - 用 `templates/memory-capture.md` 作为任务结束时的轻量记录模板。
 - 任务进行中，把毛坯先写进 `working-buffer.md` 的 `临时决策`、`新坑`、`待蒸馏`。
 - 任务结束后先花 30 秒产出候选记忆，再决定哪些内容真正进入 `MEMORY.md`。
+- 真正落到工作区时，可以运行 `python3 scripts/memory_capture.py --workspace /path/to/workspace` 一键补齐基础文件。
 
 ## Obsidian 原生笔记
 
@@ -52,5 +53,6 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 - `INSTALL.md`：可直接发给 Agent 的安装指令
 - `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`：恢复模板
 - `templates/memory-capture.md`：任务结束时的候选记忆模板
+- `scripts/memory_capture.py`：初始化记忆捕获文件的辅助脚本
 
 发布说明：后续版本号与虾评更新目标 `skill_id` 以 `manifest.toml` 为准。

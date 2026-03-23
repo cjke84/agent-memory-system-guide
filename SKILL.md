@@ -313,6 +313,14 @@ SORT updated desc
 - 只留在当前恢复层
 - 明日续接
 
+如果你是在一个新的 workspace 里启动这套流程，可以直接运行：
+
+```text
+python3 scripts/memory_capture.py --workspace /path/to/workspace
+```
+
+它会补齐缺失的 `SESSION-STATE.md`、`working-buffer.md`，并刷新一个带时间戳的 `memory-capture.md`。
+
 ### 候选记忆怎么落层
 
 - 影响下次协作方式的：进 `MEMORY.md`

@@ -43,6 +43,7 @@ OpenViking can be added later if you want semantic recall and summary support, b
 - Use `templates/memory-capture.md` as a low-friction end-of-task capture sheet.
 - During the task, write rough notes into `working-buffer.md` under `临时决策`, `新坑`, and `待蒸馏`.
 - After the task, spend 30 seconds turning those rough notes into candidate memory instead of forcing a full `MEMORY.md` rewrite.
+- To bootstrap those files in a real workspace, run `python3 scripts/memory_capture.py --workspace /path/to/workspace`.
 
 ## Files
 
@@ -53,5 +54,6 @@ OpenViking can be added later if you want semantic recall and summary support, b
 - `templates/SESSION-STATE.md` and `templates/working-buffer.md`: recovery templates
 - `templates/memory-capture.md`: end-of-task candidate-memory template
 - `templates/OBSIDIAN-NOTE.md`: Obsidian note template (frontmatter, links, embeds)
+- `scripts/memory_capture.py`: bootstrap helper for memory capture files
 
 Publish note: `manifest.toml` is the source of truth for skill versioning and the Xiaping skill id used for updates.
