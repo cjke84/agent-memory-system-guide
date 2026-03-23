@@ -291,6 +291,41 @@ SORT updated desc
 - Templater：自动创建每日笔记模板
 - 其他插件按需启用，不要让 skill 依赖插件生态
 
+## 任务结束 30 秒记录流程
+
+不要把“记忆维护”理解成一次完整总结。更稳的做法是先记毛坯，再蒸馏。
+
+### 任务中先写毛坯
+
+- 有临时判断，先写进 `working-buffer.md` 的 `临时决策`
+- 遇到新坑，先写进 `working-buffer.md` 的 `新坑`
+- 觉得“这个以后可能还会用到”，先写进 `working-buffer.md` 的 `待蒸馏`
+
+这样做的目标不是一次写对，而是先把信息从脑子里落到文件里。
+
+### 任务结束时只做 30 秒捕获
+
+结束时不要强迫自己立刻改完整的 `MEMORY.md`。先复制 `templates/memory-capture.md`，快速填这几项：
+
+- 候选决策
+- 候选踩坑
+- 候选长期记忆
+- 只留在当前恢复层
+- 明日续接
+
+### 候选记忆怎么落层
+
+- 影响下次协作方式的：进 `MEMORY.md`
+- 只影响当前任务恢复的：进 `SESSION-STATE.md` 或 `working-buffer.md`
+- 值得长期归档但不必放本地核心记忆的：进 Obsidian
+
+### 推荐节奏
+
+- 每次任务后：更新 `SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`
+- 每天或每周：把 `memory-capture.md` 和 recent notes 蒸馏进 `MEMORY.md`
+
+这样能把“需要 Agent 主动记录”降级成“先低成本捕获，再集中整理”。
+
 ## 向量检索（无需额外配置）
 
 ### OpenClaw 内置 memory_search 已足够
@@ -338,6 +373,10 @@ memory_search(query="投资策略")
 ### Q: 每日笔记必须写吗？
 
 **A:** 不是必须，但强烈建议。当天觉得“不用记”的事，三天后通常就忘了。
+
+### Q: 我总是忘记维护记忆怎么办？
+
+**A:** 不要一开始就要求自己维护完整记忆。先用 `working-buffer.md` 记录毛坯，再在任务结束时用 `memory-capture.md` 产出候选记忆，最后再统一蒸馏。
 
 ### Q: retrieval-stats.md 真的有用吗？
 

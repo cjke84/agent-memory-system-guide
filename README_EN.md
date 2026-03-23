@@ -36,6 +36,12 @@ OpenViking can be added later if you want semantic recall and summary support, b
 3. Distill stable facts into long-term memory and keep raw notes in daily files.
 4. Archive stable knowledge into Obsidian.
 
+## Memory Capture Upgrade
+
+- Use `templates/memory-capture.md` as a low-friction end-of-task capture sheet.
+- During the task, write rough notes into `working-buffer.md` under `临时决策`, `新坑`, and `待蒸馏`.
+- After the task, spend 30 seconds generating candidate memory before deciding what belongs in `MEMORY.md`.
+
 ## Obsidian-native notes
 
 - Use `templates/OBSIDIAN-NOTE.md` for durable notes: YAML frontmatter, wikilinks, embeds, and attachment conventions.
@@ -47,5 +53,6 @@ OpenViking can be added later if you want semantic recall and summary support, b
 - `manifest.toml`: publish metadata for OpenClaw / ClawHub style release workflows
 - `INSTALL.md`: a copy-paste installation prompt for agents
 - `templates/SESSION-STATE.md` and `templates/working-buffer.md`: recovery templates
+- `templates/memory-capture.md`: end-of-task candidate-memory template
 
 Publish note: `manifest.toml` is the source of truth for skill versioning and the Xiaping skill id used for updates.
