@@ -10,7 +10,7 @@ Canonical OpenClaw skill id：`memory-system`
 
 GitHub 发布归档：[v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
-当前已发布 skill 版本：`1.0.8`
+当前已发布 skill 版本：`1.0.10`
 
 ## 是什么
 
