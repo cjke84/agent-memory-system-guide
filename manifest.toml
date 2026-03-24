@@ -1,7 +1,7 @@
 name = "Agent Memory System Guide"
 slug = "agent-memory-system-guide"
-version = "1.0.10"
-description = "OpenClaw/Codex 记忆系统指南，覆盖 MEMORY.md、daily notes、SESSION-STATE、working-buffer、Obsidian 与可选 OpenViking。"
+version = "1.0.11"
+description = "An agent memory workflow guide for OpenClaw and Codex with MEMORY.md, daily notes, SESSION-STATE, working-buffer, Obsidian archiving, and optional OpenViking support."
 category = "开发辅助"
 visibility = "public"
 
