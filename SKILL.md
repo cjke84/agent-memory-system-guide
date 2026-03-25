@@ -97,6 +97,21 @@ description: Use when setting up or improving an agent memory workflow for OpenC
 - `templates/SESSION-STATE.md`
 - `templates/working-buffer.md`
 
+### 恢复层契约先写死
+
+- `SESSION-STATE.md` 只使用仓库模板提供的简洁结构：`当前任务`、`已完成`、`卡点`、`下一步`、`恢复信息`
+- 不要写入 `Task`、`Status`、`Owner`、`Last Updated`、`Cleanup Rule` 这类另一套 schema 字段
+- 如果外部 skill 产出的是详细版字段：
+  - `Current Task` 合并到 `当前任务`
+  - `Status` 合并到 `已完成`、`卡点` 或 `下一步`
+  - `Owner`、`Last Updated`、`Cleanup Rule` 只在条目文本里按需保留，不扩展新标题
+- `working-buffer.md` 是唯一的短期毛坯区
+- 其他 skill 如果也有 working buffer 概念，应复用这个文件
+- 不要再创建第二份并行写入的 WAL / buffer 文件
+- `MEMORY.md` 用于启动时快速参考
+- `memory/` 用于每日笔记和深度归档
+- 两者允许主题重叠，但检索顺序不同：先 `SESSION-STATE.md`，再 recent notes，再 `MEMORY.md` / `memory_search`，最后再查归档
+
 ### 第四步：使用 Obsidian 原生笔记模板
 
 ```markdown
@@ -141,6 +156,24 @@ memory_search(query="相关关键词")
 ```
 
 **就这么简单。后续优化可以慢慢加。**
+
+## 实战工作流示例
+
+### 首次引导
+
+首次引导工作区就当是开箱即用：复制 `templates/SESSION-STATE.md`、`templates/working-buffer.md` 和 `templates/memory-capture.md`，再跑一遍 `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`（`bootstrap` 可以省略，默认行为一致），此时 `SESSION-STATE.md`、`working-buffer.md` 和 `memory-capture.md` 都已经齐活了。`MEMORY.md` 仍然建议手动建立和维护，因为它属于长期记忆主文件，不应该被脚本悄悄代写。
+
+### 任务结束记忆捕获
+
+在任务进行中写 `working-buffer.md` 的 `临时决策`/`新坑`/`待蒸馏`，任务结束前 30 秒用 `templates/memory-capture.md` 的 `候选决策`、`候选踩坑`、`候选长期记忆` 把最重要的内容整理出来，再决定哪些内容最终写入 `MEMORY.md`。这个环节让临时笔记和长期记忆的边界清晰且不会掉链子。
+
+### 每日笔记蒸馏
+
+每日笔记蒸馏指的是定期从 `memory/` 下最新的 Markdown 文件里抽取事实和决策转换到 `MEMORY.md`，同时保留原笔记供深度回溯。把这个行为设定为每日或每周结束时的步骤，能确保 `MEMORY.md` 只包含真正长期有用的内容。
+
+### 维护报告命令
+
+`report command` 用来检查工作区当前状态，**永远不会**写入记忆文件。运行 `python3 scripts/memory_capture.py report --workspace /path/to/workspace`，它会输出四节：**Supported files**（`MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`）、**Directories**（递归扫描 `memory/` 和 `attachments/`，在 memory/ 里只统计形如 `YYYY-MM-DD.md` 的 daily notes，在 attachments/ 里数所有文件）、**Latest daily note**（选取 `memory/` 下字典序最新的匹配 daily note 路径）、**Warnings**（比如某个文件缺失或者权限异常）。像 `memory/index.md` 这样的参考页不会被当成 latest daily note。报告命令只在工作区目录不存在或无法读取时退出非 0；其它情况下即便有警告也返回 0。supported files、directories、latest daily note 以及 warnings 是报告里每条节的标题，方便快速对照命令输出。
 
 ---
 
@@ -257,6 +290,16 @@ SORT updated desc
 - 中断后恢复：优先从 `working-buffer.md` 续接未完成项
 - 仓库模板：先复制 `templates/SESSION-STATE.md` 和 `templates/working-buffer.md`，再填入当前任务
 
+## 文件职责边界
+
+- `SESSION-STATE.md` 保存当前任务恢复所需的最小真相，不承担项目管理面板职责
+- `SESSION-STATE.md` 不扩展为详细版任务模板；兼容外部格式时，只做字段合并，不新增 schema
+- `working-buffer.md` 是唯一的短期毛坯区，负责临时决策、新坑、待蒸馏和未完成项
+- 如果其他 skill 也定义了 working buffer / WAL，直接复用 `working-buffer.md`
+- `MEMORY.md` 保存会影响后续协作方式的稳定事实，适合启动时快速参考
+- `memory/` 保存 daily notes 和深度归档，按需进入，不要求每次启动都全量阅读
+- Obsidian / OpenViking 只做增强或归档层，不替代本地恢复层
+
 ## 记忆维护策略
 
 ### 蒸馏法则
@@ -274,7 +317,7 @@ SORT updated desc
 - 保留短期会话真相：`SESSION-STATE.md`、`working-buffer.md`、最近 1-3 天 daily notes
 - 保留长期稳定事实：`MEMORY.md`
 - 需要长期查阅的完整材料：归档到 Obsidian
-- 检索优先级：本地记忆 → Obsidian → 网络搜索
+- 检索优先级：`SESSION-STATE.md` → recent daily notes → `MEMORY.md` / `memory_search` → Obsidian → 网络搜索
 - 目标：`MEMORY.md` 保持精炼，超过约 200 行就蒸馏
 
 ### 蒸馏与归档
@@ -290,6 +333,28 @@ SORT updated desc
 - Dataview：查询和统计记忆内容
 - Templater：自动创建每日笔记模板
 - 其他插件按需启用，不要让 skill 依赖插件生态
+
+### Obsidian 配置
+
+- 建议把 `MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`、`memory/`、`attachments/` 放在同一个 vault 里
+- `attachments/` 作为统一附件目录，方便 embeds、迁移备份和跨设备同步
+- Dataview 只负责查询，不负责改写记忆内容
+- Templater 只负责建模板，不负责自动蒸馏长期记忆
+
+### 定时维护
+
+- 可以用 `crontab` 定时跑 `python3 scripts/memory_capture.py report --workspace /path/to/workspace --output /path/to/workspace-report.md`
+- 也可以用 `crontab` 定时跑导出备份命令
+- 自动化优先做检查、报告、备份
+- 不要自动写入 `MEMORY.md`
+
+### 同步取舍
+
+- `Obsidian Sync` 更省心，适合把 Obsidian 当主界面的用户
+- `iCloud` 之类网盘更轻便，但要注意冲突副本
+- `git` 更适合文本版本化，不适合单独承担附件备份
+- `Syncthing` 更适合本地控制和点对点同步
+- 不管选哪种同步方式，都保留导出备份 / 导入恢复作为兜底方案
 
 ## 任务结束 30 秒记录流程
 
@@ -320,6 +385,36 @@ python3 scripts/memory_capture.py --workspace /path/to/workspace
 ```
 
 它会补齐缺失的 `SESSION-STATE.md`、`working-buffer.md`，并刷新一个带时间戳的 `memory-capture.md`。
+
+## 跨设备迁移：导出备份与导入恢复
+
+如果你的目标是不换流程、只换设备，那就不要只拷 `MEMORY.md`。更稳的做法是导出整个记忆工作区的可恢复快照。
+
+### 导出备份
+
+在旧设备执行：
+
+```text
+python3 scripts/memory_capture.py export --workspace /path/to/workspace --output /path/to/memory-backup.zip
+```
+
+导出备份会把存在的 `MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`、`memory/`、`attachments/` 打进一个 zip，方便直接迁移到新设备。
+
+### 导入恢复
+
+在新设备执行：
+
+```text
+python3 scripts/memory_capture.py import --workspace /path/to/new-workspace --input /path/to/memory-backup.zip
+```
+
+导入恢复默认采用保守策略：先做导入前备份，再覆盖写入。这样即使目标目录里已经有旧的记忆文件，也能回滚到导入前状态。
+
+### 什么时候用
+
+- 需要把 Agent 的记忆状态搬到新设备
+- 需要离线留档一份完整的可恢复快照
+- 需要在覆盖恢复前自动保留当前工作区状态
 
 ### 候选记忆怎么落层
 
@@ -400,7 +495,7 @@ memory_search(query="投资策略")
 
 ### Q: Obsidian 备份多久同步一次？
 
-**A:** 可选。只有明确需要离线备份或跨设备共享时再同步。
+**A:** 可选。只有明确需要离线备份或跨设备共享时再同步。真要迁移时，优先用导出备份 + 导入恢复，而不是手工逐个复制文件。
 
 ## 踩坑记录
 
