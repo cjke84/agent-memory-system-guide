@@ -56,6 +56,23 @@ def build_capture_content(repo_root: Path, generated_at: str) -> str:
     )
 
 
+def write_capture_file(
+    workspace: Path,
+    generated_at: str,
+    repo_root: Path,
+    *,
+    refresh: bool,
+) -> str:
+    capture_path = workspace / "memory-capture.md"
+    if capture_path.exists() and not refresh:
+        return "kept"
+    existed = capture_path.exists()
+    capture_path.write_text(build_capture_content(repo_root, generated_at), encoding="utf-8")
+    if refresh and existed:
+        return "refreshed"
+    return "created"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Bootstrap, export, and import lightweight memory workspace files."
@@ -67,6 +84,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Create baseline memory capture files in a workspace.",
     )
     add_workspace_arguments(bootstrap)
+    bootstrap.add_argument(
+        "--refresh-capture",
+        action="store_true",
+        help="Overwrite memory-capture.md with a regenerated capture sheet.",
+    )
 
     export_parser = subparsers.add_parser(
         "export",
@@ -339,18 +361,41 @@ def create_bootstrap_files(workspace: Path, generated_at: str, repo_root: Path) 
         read_template(repo_root, "working-buffer.md"),
     )
 
-    capture_path = workspace / "memory-capture.md"
-    capture_path.write_text(build_capture_content(repo_root, generated_at), encoding="utf-8")
+    capture_status = write_capture_file(
+        workspace,
+        generated_at,
+        repo_root,
+        refresh=False,
+    )
 
     print(f"SESSION-STATE.md: {session_status}")
     print(f"working-buffer.md: {buffer_status}")
-    print("memory-capture.md: refreshed")
+    print(f"memory-capture.md: {capture_status}")
 
 
 def handle_bootstrap(args: argparse.Namespace, repo_root: Path) -> int:
     workspace = Path(args.workspace).expanduser().resolve()
     workspace.mkdir(parents=True, exist_ok=True)
     generated_at = args.generated_at or iso_now()
+    if args.refresh_capture:
+        session_status = ensure_file(
+            workspace / "SESSION-STATE.md",
+            read_template(repo_root, "SESSION-STATE.md"),
+        )
+        buffer_status = ensure_file(
+            workspace / "working-buffer.md",
+            read_template(repo_root, "working-buffer.md"),
+        )
+        capture_status = write_capture_file(
+            workspace,
+            generated_at,
+            repo_root,
+            refresh=True,
+        )
+        print(f"SESSION-STATE.md: {session_status}")
+        print(f"working-buffer.md: {buffer_status}")
+        print(f"memory-capture.md: {capture_status}")
+        return 0
     create_bootstrap_files(workspace, generated_at, repo_root)
     return 0
 

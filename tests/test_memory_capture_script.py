@@ -56,6 +56,37 @@ def test_bootstrap_preserves_existing_state_files(tmp_path: Path):
     assert working_buffer.read_text(encoding='utf-8') == '# working-buffer.md\n\ncustom buffer\n'
 
 
+def test_bootstrap_preserves_existing_memory_capture_file(tmp_path: Path):
+    capture_path = tmp_path / 'memory-capture.md'
+    capture_path.write_text('# memory-capture.md\n\nkeep me\n', encoding='utf-8')
+
+    result = run_script(tmp_path, '--generated-at', '2026-03-26T09:00:00+08:00')
+
+    assert result.returncode == 0
+    assert capture_path.read_text(encoding='utf-8') == '# memory-capture.md\n\nkeep me\n'
+    assert 'memory-capture.md: kept' in result.stdout
+
+
+def test_bootstrap_refresh_capture_overwrites_existing_memory_capture_file(tmp_path: Path):
+    capture_path = tmp_path / 'memory-capture.md'
+    capture_path.write_text('# memory-capture.md\n\nold content\n', encoding='utf-8')
+
+    result = run_command(
+        'bootstrap',
+        '--workspace',
+        str(tmp_path),
+        '--generated-at',
+        '2026-03-26T09:05:00+08:00',
+        '--refresh-capture',
+    )
+
+    assert result.returncode == 0
+    capture_text = capture_path.read_text(encoding='utf-8')
+    assert 'Generated at: 2026-03-26T09:05:00+08:00' in capture_text
+    assert '候选决策' in capture_text
+    assert 'memory-capture.md: refreshed' in result.stdout
+
+
 def test_bootstrap_subcommand_creates_missing_memory_files(tmp_path: Path):
     result = run_command(
         'bootstrap',
