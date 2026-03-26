@@ -123,6 +123,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_workspace_arguments(report_parser, include_generated_at=False)
     report_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the report payload as JSON to stdout.",
+    )
+    report_parser.add_argument(
         "--output",
         help="Optional Markdown file path for the report.",
     )
@@ -282,6 +287,21 @@ def format_report_markdown(data: ReportData) -> str:
         lines.append("- none")
     lines.append("")
     return "\n".join(lines)
+
+
+def report_payload(data: ReportData) -> dict[str, object]:
+    return {
+        "workspace": str(data.workspace),
+        "supported_files": data.supported_files,
+        "memory_note_count": data.memory_note_count,
+        "attachments_count": data.attachments_count,
+        "latest_daily_note": (
+            data.latest_daily_note.relative_to(data.workspace).as_posix()
+            if data.latest_daily_note
+            else None
+        ),
+        "warnings": data.warnings,
+    }
 
 
 def relative_archive_name(path: Path, workspace: Path) -> str:
@@ -499,13 +519,17 @@ def handle_report(args: argparse.Namespace) -> int:
         print(f"Workspace does not exist: {workspace}", file=sys.stderr)
         return 1
     report_data = collect_report_data(workspace)
-    print(format_report_text(report_data))
+    if args.json:
+        print(json.dumps(report_payload(report_data), ensure_ascii=False, indent=2))
+    else:
+        print(format_report_text(report_data))
     output_path = getattr(args, "output", None)
     if output_path:
         destination = Path(output_path).expanduser().resolve()
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(format_report_markdown(report_data), encoding="utf-8")
-        print(f"Report written: {destination}")
+        if not args.json:
+            print(f"Report written: {destination}")
     return 0
 
 
