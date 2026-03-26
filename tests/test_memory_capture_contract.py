@@ -11,6 +11,8 @@ def test_skill_mentions_memory_capture_flow():
     assert '导出备份' in skill_text
     assert '导入恢复' in skill_text
     assert '导入前备份' in skill_text
+    assert '--clean' in skill_text
+    assert 'clean restore' in skill_text
 
 
 def test_memory_capture_template_exists():
@@ -30,10 +32,16 @@ def test_readmes_document_cross_device_backup_restore():
 
     assert 'export' in readme_text
     assert 'import' in readme_text
+    assert '--clean' in readme_text
     assert '新设备' in readme_cn_text
     assert '导入前备份' in readme_cn_text
+    assert '--clean' in readme_cn_text
+    assert '保守' in readme_cn_text
     assert 'new device' in readme_en_text
     assert 'pre-import backup' in readme_en_text
+    assert '--clean' in readme_en_text
+    assert 'conservative' in readme_en_text
+    assert 'overwrite-style restore' in readme_en_text
 
 
 def test_skill_declares_working_buffer_as_only_short_term_scratchpad():

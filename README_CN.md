@@ -153,7 +153,8 @@ python3 scripts/memory_capture.py report --workspace /path/to/workspace --output
 
 - 在旧设备导出备份：`python3 scripts/memory_capture.py export --workspace /path/to/workspace --output /path/to/memory-backup.zip`
 - 把备份包带到新设备后导入恢复：`python3 scripts/memory_capture.py import --workspace /path/to/new-workspace --input /path/to/memory-backup.zip`
-- 导入前备份：导入会先把目标工作区当前的记忆文件打成一个 zip，再执行覆盖恢复。
+- 默认导入是保守模式：会先做导入前备份，再执行覆盖式恢复，不会删除目标工作区里额外存在的受支持记忆文件。
+- 如果你要让受支持的记忆面与备份包保持一致，使用 `python3 scripts/memory_capture.py import --clean --workspace /path/to/new-workspace --input /path/to/memory-backup.zip` 做 clean restore。
 - 备份包会包含存在的 `MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`、`memory/` 和 `attachments/`。
 
 ## Obsidian 配置指南

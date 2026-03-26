@@ -193,6 +193,101 @@ def test_import_restores_files_and_backs_up_existing_state(tmp_path: Path):
         assert archive.read('MEMORY.md').decode('utf-8') == '# MEMORY\n\nexisting\n'
 
 
+def test_import_preserves_extra_supported_files_by_default(tmp_path: Path):
+    source_workspace = tmp_path / 'source'
+    source_memory_dir = source_workspace / 'memory'
+    source_memory_dir.mkdir(parents=True)
+    (source_workspace / 'MEMORY.md').write_text('# MEMORY\n\nrestored\n', encoding='utf-8')
+    (source_memory_dir / '2026-03-25.md').write_text('# daily restored\n', encoding='utf-8')
+    archive_path = tmp_path / 'memory-backup.zip'
+
+    export_result = run_command(
+        'export',
+        '--workspace',
+        str(source_workspace),
+        '--output',
+        str(archive_path),
+        '--generated-at',
+        '2026-03-26T10:00:00+08:00',
+    )
+    assert export_result.returncode == 0
+
+    target_workspace = tmp_path / 'target'
+    target_memory_dir = target_workspace / 'memory'
+    target_memory_dir.mkdir(parents=True)
+    (target_workspace / 'MEMORY.md').write_text('# MEMORY\n\nexisting\n', encoding='utf-8')
+    extra_note = target_memory_dir / '2026-03-20.md'
+    extra_note.write_text('# extra daily note\n', encoding='utf-8')
+
+    result = run_command(
+        'import',
+        '--workspace',
+        str(target_workspace),
+        '--input',
+        str(archive_path),
+        '--generated-at',
+        '2026-03-26T10:05:00+08:00',
+    )
+
+    assert result.returncode == 0
+    assert extra_note.exists()
+    assert 'Import mode: conservative' in result.stdout
+
+
+def test_import_clean_removes_extra_supported_files_before_restore(tmp_path: Path):
+    source_workspace = tmp_path / 'source'
+    source_memory_dir = source_workspace / 'memory'
+    source_memory_dir.mkdir(parents=True)
+    (source_workspace / 'MEMORY.md').write_text('# MEMORY\n\nrestored\n', encoding='utf-8')
+    (source_memory_dir / '2026-03-25.md').write_text('# daily restored\n', encoding='utf-8')
+    archive_path = tmp_path / 'memory-backup.zip'
+
+    export_result = run_command(
+        'export',
+        '--workspace',
+        str(source_workspace),
+        '--output',
+        str(archive_path),
+        '--generated-at',
+        '2026-03-26T10:10:00+08:00',
+    )
+    assert export_result.returncode == 0
+
+    target_workspace = tmp_path / 'target'
+    target_memory_dir = target_workspace / 'memory'
+    attachments_dir = target_workspace / 'attachments'
+    target_memory_dir.mkdir(parents=True)
+    attachments_dir.mkdir()
+    (target_workspace / 'MEMORY.md').write_text('# MEMORY\n\nexisting\n', encoding='utf-8')
+    extra_note = target_memory_dir / '2026-03-20.md'
+    extra_note.write_text('# extra daily note\n', encoding='utf-8')
+    extra_attachment = attachments_dir / 'old.txt'
+    extra_attachment.write_text('old\n', encoding='utf-8')
+
+    result = run_command(
+        'import',
+        '--workspace',
+        str(target_workspace),
+        '--input',
+        str(archive_path),
+        '--generated-at',
+        '2026-03-26T10:15:00+08:00',
+        '--clean',
+    )
+
+    assert result.returncode == 0
+    assert not extra_note.exists()
+    assert not extra_attachment.exists()
+    assert (target_workspace / 'memory' / '2026-03-25.md').exists()
+    assert 'Import mode: clean' in result.stdout
+
+    backups = sorted(target_workspace.glob('memory-import-backup-*.zip'))
+    assert backups
+    with zipfile.ZipFile(backups[0]) as archive:
+        assert archive.read('memory/2026-03-20.md').decode('utf-8') == '# extra daily note\n'
+        assert archive.read('attachments/old.txt').decode('utf-8') == 'old\n'
+
+
 def test_report_prints_workspace_summary(tmp_path: Path):
     workspace = tmp_path / 'workspace'
     workspace.mkdir()

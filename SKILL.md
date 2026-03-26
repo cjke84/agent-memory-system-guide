@@ -410,6 +410,14 @@ python3 scripts/memory_capture.py import --workspace /path/to/new-workspace --in
 
 导入恢复默认采用保守策略：先做导入前备份，再覆盖写入。这样即使目标目录里已经有旧的记忆文件，也能回滚到导入前状态。
 
+如果你需要 clean restore，可以改用：
+
+```text
+python3 scripts/memory_capture.py import --clean --workspace /path/to/new-workspace --input /path/to/memory-backup.zip
+```
+
+`--clean` 只会清理受支持的记忆文件和目录：`MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`、`memory/`、`attachments/`，不会删除工作区里的其他内容。
+
 ### 什么时候用
 
 - 需要把 Agent 的记忆状态搬到新设备

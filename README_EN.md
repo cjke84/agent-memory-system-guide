@@ -155,7 +155,8 @@ The generated `/path/to/workspace-report.md` will look like:
 
 - Export a portable backup zip on the old device with `python3 scripts/memory_capture.py export --workspace /path/to/workspace --output /path/to/memory-backup.zip`.
 - Move the archive to a new device and restore with `python3 scripts/memory_capture.py import --workspace /path/to/new-workspace --input /path/to/memory-backup.zip`.
-- Import always creates a pre-import backup of the destination memory files before overwrite.
+- Default import is conservative: it always creates a pre-import backup, then performs an overwrite-style restore without deleting extra supported files already present in the target workspace.
+- Use `python3 scripts/memory_capture.py import --clean --workspace /path/to/new-workspace --input /path/to/memory-backup.zip` when you want a deterministic clean restore of the supported memory surface.
 - The archive includes `MEMORY.md`, `SESSION-STATE.md`, `working-buffer.md`, `memory-capture.md`, `memory/`, and `attachments/` when they exist.
 
 ## Obsidian setup guide

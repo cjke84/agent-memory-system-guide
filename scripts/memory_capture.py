@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import argparse
 import json
 import re
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -110,6 +111,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--input",
         required=True,
         help="Input zip archive path.",
+    )
+    import_parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Remove supported memory files and directories before restoring the archive.",
     )
     report_parser = subparsers.add_parser(
         "report",
@@ -439,6 +445,17 @@ def backup_existing_workspace_state(workspace: Path, generated_at: str) -> Path 
     return archive_path
 
 
+def clear_supported_workspace_state(workspace: Path) -> None:
+    for name in SUPPORTED_FILES:
+        candidate = workspace / name
+        if candidate.exists():
+            candidate.unlink()
+    for directory_name in SUPPORTED_DIRECTORIES:
+        directory = workspace / directory_name
+        if directory.exists():
+            shutil.rmtree(directory)
+
+
 def restore_archive(archive: zipfile.ZipFile, workspace: Path, members: list[str]) -> None:
     for member in members:
         target_path = workspace / PurePosixPath(member)
@@ -459,11 +476,15 @@ def handle_import(args: argparse.Namespace) -> int:
         with zipfile.ZipFile(archive_path) as archive:
             members = safe_members_from_manifest(archive)
             backup_path = backup_existing_workspace_state(workspace, generated_at)
+            if args.clean:
+                clear_supported_workspace_state(workspace)
             restore_archive(archive, workspace, members)
     except (ValueError, zipfile.BadZipFile) as error:
         print(f"Import failed: {error}", file=sys.stderr)
         return 1
 
+    mode = "clean" if args.clean else "conservative"
+    print(f"Import mode: {mode}")
     if backup_path is None:
         print("Pre-import backup: none needed")
     else:
