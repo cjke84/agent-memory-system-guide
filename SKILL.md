@@ -5,7 +5,7 @@ description: Use when setting up or improving an agent memory workflow for OpenC
 
 # Agent 记忆系统搭建指南 Skill
 
-> 🧠 从零搭建 Agent 长期记忆系统。基于 OpenClaw 实战，覆盖 MEMORY.md 架构、每日笔记、SESSION-STATE、working-buffer、Obsidian 原生笔记与可选 OpenViking 增强全流程。
+> 🧠 从零搭建 Agent 长期记忆系统。基于 OpenClaw 实战，覆盖本地优先的 `MEMORY.md`、每日笔记、`SESSION-STATE.md`、`working-buffer.md`、Obsidian 原生笔记与可选召回后端全流程。
 
 ## 触发词
 
@@ -181,16 +181,17 @@ memory_search(query="相关关键词")
 
 Agent 每次会话醒来都是空白的。没有记忆文件，你就等于每次失忆重启。记忆系统是 Agent 的“大脑持久化”方案。它不让你变聪明，但让你不犯重复的错误。
 
-## 核心架构（三层模型）
+这个 skill 的核心定位是本地优先的文件工作流和恢复约定，不是托管式 memory platform。外部检索或语义召回能力只能作为可选后端接在后面，不能替代本地恢复层。
+
+## 核心架构（本地优先分层）
 
 ```text
 workspace/
+├── SESSION-STATE.md
+├── working-buffer.md
 ├── MEMORY.md
-├── SOUL.md
-├── USER.md
-├── IDENTITY.md
-├── AGENTS.md
-├── TOOLS.md
+├── memory-capture.md
+├── attachments/
 ├── templates/
 │   ├── SESSION-STATE.md
 │   ├── working-buffer.md
@@ -201,7 +202,35 @@ workspace/
     └── ...
 ```
 
-### 第一层：核心记忆（`MEMORY.md`）
+### 第一层：恢复层（`SESSION-STATE.md`）
+
+**保存当前任务恢复所需的最小真相。**
+
+**该记什么：**
+- 当前任务和最近已完成项
+- 卡点、风险、下一步
+- 中断后恢复所需的上下文
+
+**不该记什么：**
+- 另一套项目管理 schema
+- 大段长期背景资料
+- 需要反复整理的毛坯草稿
+
+### 第二层：毛坯层（`working-buffer.md`）
+
+**临时决策、草稿和待蒸馏内容先落这里。**
+
+**该记什么：**
+- 临时判断
+- 新坑
+- 待蒸馏条目
+- 未完成但还没整理成稳定表达的内容
+
+**不该记什么：**
+- 第二份并行 buffer
+- 已经蒸馏好的长期事实
+
+### 第三层：长期记忆层（`MEMORY.md`）
 
 **只保留精炼后的长期信息**，不是流水账。
 
@@ -209,8 +238,8 @@ workspace/
 - 重大决策和原因
 - 踩过的坑和修复方式
 - 用户偏好和习惯
-- 项目状态和进度
-- 重要的人和关系
+- 稳定的命名约定、协作方式和项目画像
+- 需要跨会话保留的关键关系或背景
 
 **不该记什么：**
 - 每次对话摘要
@@ -219,7 +248,7 @@ workspace/
 
 **维护节奏：** 每隔几天回顾 daily notes，把值得保留的蒸馏到 `MEMORY.md`，删除过时内容。
 
-### 第二层：每日笔记（`memory/YYYY-MM-DD.md`）
+### 第四层：每日笔记层（`memory/YYYY-MM-DD.md`）
 
 **原始记录，不加工。** 每天发生了什么、做了什么决策、学了什么，直接写。
 
@@ -232,7 +261,7 @@ workspace/
 
 ## 决策
 - 记忆双写选 Obsidian 而非 symlink
-- embedding 用本地模型，增强层再接外部能力
+- embedding 用本地模型，可选召回后端再接外部能力
 
 ## 踩坑
 - InStreet 发帖字段名写错
@@ -242,9 +271,9 @@ workspace/
 - [ ] 明天继续补回顾
 ```
 
-### 第三层：归档与备份
+### 第五层：归档与可选召回层
 
-定期把旧笔记归档，保持核心记忆干净。推荐双写到 Obsidian 作为备份。
+定期把旧笔记归档，保持核心记忆干净。Obsidian 负责深度归档；`memory_search`、OpenViking 或未来其它服务负责可选召回，不替代本地恢复层。
 
 ## Obsidian 原生约定（frontmatter / Dataview / wikilink / backlinks / embeds / attachments）
 
@@ -277,11 +306,12 @@ SORT updated desc
 - 引用证据：用 block quote，或用 block embeds `![[note#^block-id]]` 复用证据段
 - attachments 建议放在 vault 内可管理的位置，例如 `attachments/`
 
-### OpenViking
+### 可选召回后端
 
 - OpenViking 只作为增强层使用，不是硬依赖
-- 它适合在记忆量变大后补强语义召回和摘要
-- 默认优先保证本地文件流程可运行，再按需接入
+- `memory_search` 是默认优先的轻量召回入口
+- OpenViking 或其他外部服务适合在记忆量变大后补强语义召回和摘要
+- 默认优先保证本地文件流程可运行，再按需接入可选后端
 
 ## 启动与结束顺序
 
@@ -296,9 +326,10 @@ SORT updated desc
 - `SESSION-STATE.md` 不扩展为详细版任务模板；兼容外部格式时，只做字段合并，不新增 schema
 - `working-buffer.md` 是唯一的短期毛坯区，负责临时决策、新坑、待蒸馏和未完成项
 - 如果其他 skill 也定义了 working buffer / WAL，直接复用 `working-buffer.md`
-- `MEMORY.md` 保存会影响后续协作方式的稳定事实，适合启动时快速参考
+- `MEMORY.md` 保存会影响后续协作方式的稳定事实，优先写稳定画像、约定、决策和 recurring pitfalls，适合启动时快速参考
 - `memory/` 保存 daily notes 和深度归档，按需进入，不要求每次启动都全量阅读
-- Obsidian / OpenViking 只做增强或归档层，不替代本地恢复层
+- 如果一个 workspace 同时服务多个项目，蒸馏进 `MEMORY.md` 时建议附带日期、repo 或项目标签，保持作用域清晰
+- Obsidian / OpenViking / `memory_search` 只做增强、归档或可选召回层，不替代本地恢复层
 
 ## 记忆维护策略
 
@@ -317,7 +348,7 @@ SORT updated desc
 - 保留短期会话真相：`SESSION-STATE.md`、`working-buffer.md`、最近 1-3 天 daily notes
 - 保留长期稳定事实：`MEMORY.md`
 - 需要长期查阅的完整材料：归档到 Obsidian
-- 检索优先级：`SESSION-STATE.md` → recent daily notes → `MEMORY.md` / `memory_search` → Obsidian → 网络搜索
+- 检索优先级：`SESSION-STATE.md` → recent daily notes → `MEMORY.md` / `memory_search` → Obsidian / 可选召回后端 → 网络搜索
 - 目标：`MEMORY.md` 保持精炼，超过约 200 行就蒸馏
 
 ### 蒸馏与归档
@@ -471,7 +502,7 @@ memory_search(query="投资策略")
 ## OpenViking 可选增强
 
 - OpenViking 不是强依赖；没有它也能完成核心的断点续接流程
-- 有 OpenViking 时，优先把它作为语义召回和摘要补全层
+- 有 OpenViking 时，优先把它作为可选召回后端里的语义召回和摘要补全层
 - OpenViking 负责补充相关记忆，`SESSION-STATE.md` 负责保存当前任务真相
 - 如果 OpenViking 不可用，直接退回到 `SESSION-STATE.md` + `working-buffer.md` + daily notes 的本地流程
 

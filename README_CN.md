@@ -10,19 +10,16 @@ Canonical OpenClaw skill id：`memory-system`
 
 GitHub 发布归档：[v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
-当前已发布 skill 版本：`1.1.1`
+当前已发布 skill 版本：`1.1.5`
 
 ## 是什么
 
-这个 skill 说明如何给 Agent 搭建长期记忆：用精简的 `MEMORY.md`、每日笔记、记忆蒸馏和 Obsidian 备份组成一套稳定的记忆层。
+这个 skill 说明如何给 Agent 搭建长期记忆：用精简的 `MEMORY.md`、每日笔记、记忆蒸馏和 Obsidian 备份组成一套稳定的本地优先记忆层。
+它是本地文件工作流和约定，不是托管式 memory platform。
 OpenViking 是可选增强层，用来补充语义召回和摘要。
+可以把 OpenViking、`memory_search`，或者未来别的记忆服务都理解成可选召回后端，而不是本地恢复层的替代品。
 
-## 可选增强
-
-如果你后面想补语义召回和摘要，可以再加 OpenViking，但它不是核心流程的必需项。
-
-## 适合谁
-
+适合：
 - 需要长期记忆的 Agent
 - 需要保留每日笔记并蒸馏稳定事实的 Agent
 - 想把 Obsidian 作为长期归档的用户
@@ -45,7 +42,26 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 - 两层允许有内容重叠，但职责不同，不视为冲突
 - 检索顺序：先 `SESSION-STATE.md`，再 recent daily notes，再 `MEMORY.md` 或 `memory_search`，最后才进入 Obsidian / 深度归档
 
-## 记忆捕获升级
+## 记忆分层
+
+- `SESSION-STATE.md`：当前任务的恢复层，保存中断后续接所需的最小真相
+- `working-buffer.md`：毛坯区，放临时判断、草稿和待蒸馏内容
+- `MEMORY.md`：蒸馏后的长期记忆，保存稳定偏好、约定、决策和高频踩坑
+- `memory/`：每日笔记和按项目沉淀的原始过程记录
+- Obsidian、`memory_search`、OpenViking 或其他外部工具：深度归档或可选召回层
+
+实践边界：
+- 长期稳定画像写进 `MEMORY.md`
+- 高频变化的执行过程留在 `SESSION-STATE.md`、`working-buffer.md` 和 daily notes
+- 只有本地恢复层不够时，才进一步查归档或语义召回
+
+## 稳定画像与项目作用域
+
+- `MEMORY.md` 应优先保存稳定画像：偏好、命名约定、架构决策、反复出现的坑，以及会影响后续协作方式的事实。
+- 快速变化的执行细节应留在 `SESSION-STATE.md`、`working-buffer.md` 和 recent daily notes。
+- 如果一个工作区同时服务多个项目，蒸馏进 `MEMORY.md` 时建议补上日期、仓库名或项目标签，保证后续检索有作用域，但不额外引入强制 schema。
+
+## 记忆捕获
 
 - 用 `templates/memory-capture.md` 作为任务结束时的轻量记录模板。
 - 任务进行中，把毛坯先写进 `working-buffer.md` 的 `临时决策`、`新坑`、`待蒸馏`。
@@ -58,15 +74,19 @@ OpenViking 是可选增强层，用来补充语义召回和摘要。
 
 ### 首次引导
 
-首次引导阶段只需复制 `templates/SESSION-STATE.md`、`templates/working-buffer.md`、`templates/memory-capture.md`，再运行 `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`（或者省略 `bootstrap` 使用默认命令）就能补齐 `SESSION-STATE.md`、`working-buffer.md` 并刷新记忆捕获模板。`MEMORY.md` 仍然建议手动创建和维护，这样长期记忆的结构由你自己掌控。把这段命令写进安装清单，确保不会漏掉任何恢复层文件。
+首次引导阶段只需复制 `templates/SESSION-STATE.md`、`templates/working-buffer.md`、`templates/memory-capture.md`，再运行 `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`（或者省略 `bootstrap` 使用默认命令）就能补齐 `SESSION-STATE.md`、`working-buffer.md` 并刷新记忆捕获模板。`MEMORY.md` 仍然建议手动创建和维护，这样长期记忆的结构由你自己掌控。
 
 ### 任务结束记忆捕获
 
-任务结束记忆捕获的节奏是：先在 `working-buffer.md` 写下临时想法，任务结束前的 30 秒把重点填写到 `templates/memory-capture.md` 的 `候选决策`、`候选踩坑`、`候选长期记忆`，然后再决定哪些内容真正写入 `MEMORY.md`。这样就把临时笔记和长期记忆的边界拉清楚，又不费劲。
+任务结束记忆捕获的节奏是：先在 `working-buffer.md` 写下临时想法，任务结束前的 30 秒把重点填写到 `templates/memory-capture.md` 的 `候选决策`、`候选踩坑`、`候选长期记忆`，然后再决定哪些内容真正写入 `MEMORY.md`。这样就把临时笔记和长期记忆的边界拉清楚。
 
 ### 每日笔记蒸馏
 
-每日笔记蒸馏是让长期记忆保持干净的方式。打开 `memory/` 下最新的 Markdown 文件，挑出重要决策和洞察，放进 `MEMORY.md` 并补上日期或项目标签，保留原始的当日笔记做参考。把蒸馏这一环节当作每日流程的一部分，就不会让 `MEMORY.md` 因为流水账膨胀。
+每日笔记蒸馏是让长期记忆保持干净的方式。打开 `memory/` 下最新的 Markdown 文件，挑出重要决策和洞察，放进 `MEMORY.md` 并补上日期或项目标签，保留原始的当日笔记做参考。
+
+### Memory 不等于通用 RAG
+
+这个工作流把 memory 看成分层系统，而不是一个统统丢进去再检索的大桶。`MEMORY.md` 保存稳定画像和长期协作事实，`memory/` 保存原始执行历史，Obsidian 和可选语义工具负责深度召回。这样既保留本地工作流的可审计和可迁移性，也避免把这个仓库讲成一个在线 memory API 产品。
 
 ### 报告示例
 

@@ -4,7 +4,7 @@
 
 GitHub repository: [cjke84/agent-memory-system-guide](https://github.com/cjke84/agent-memory-system-guide)
 
-English overview: This repository provides a practical Agent long-term memory workflow for OpenClaw and Codex. It combines a compact `MEMORY.md`, daily notes, session recovery files, and Obsidian archiving, with OpenViking as an optional enhancement rather than a hard dependency.
+English overview: This repository provides a practical local-first Agent long-term memory workflow for OpenClaw and Codex. It combines a compact `MEMORY.md`, daily notes, session recovery files, and Obsidian archiving, with OpenViking as an optional enhancement rather than a hard dependency.
 
 Canonical OpenClaw skill id: `memory-system`
 
@@ -14,19 +14,17 @@ Canonical OpenClaw skill id: `memory-system`
 - [中文介绍](README_CN.md)
 - [Install Skill for Agent](INSTALL.md)
 - GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
-- Current published skill version: `1.1.1`
+- Current published skill version: `1.1.5`
 
 ## What it is
 
 An Agent long-term memory guide for OpenClaw and Obsidian workflows.
+It is a local-first workflow and file contract, not a hosted memory platform.
 OpenViking is an optional enhancement for semantic recall and summary support.
+It is not required for the core workflow.
+Treat OpenViking, `memory_search`, or future memory services as optional recall backends that sit behind the local recovery layer instead of replacing it.
 
-## Optional enhancement
-
-OpenViking can be added later if you want semantic recall and summary support, but it is not required for the core workflow.
-
-## Who it is for
-
+Best fit:
 - Agents that need persistent memory
 - Agents that should keep daily notes and distill stable facts
 - Users who want Obsidian as the long-term archive
@@ -48,7 +46,26 @@ OpenViking can be added later if you want semantic recall and summary support, b
 - Overlap between `MEMORY.md` and `memory/` is acceptable, but their retrieval roles are different
 - Lookup order: `SESSION-STATE.md` first, then recent daily notes, then `MEMORY.md` or `memory_search`, and only then Obsidian or deeper archives
 
-## Memory Capture Upgrade
+## Memory layers
+
+- `SESSION-STATE.md`: the active recovery layer for the interrupted task
+- `working-buffer.md`: rough notes, temporary decisions, and pre-distillation scratch space
+- `MEMORY.md`: distilled long-term memory for stable preferences, conventions, decisions, and recurring pitfalls
+- `memory/`: daily notes and project-scoped raw history
+- Obsidian, `memory_search`, OpenViking, or another external tool: deeper archive or optional recall layer
+
+Practical boundary:
+- Use memory for durable profile and collaboration facts.
+- Use daily notes for volatile execution history.
+- Use archive or semantic search only after the local recovery files stop being enough.
+
+## Stable profile and project scope
+
+- Bias `MEMORY.md` toward stable profile: preferences, naming conventions, architecture decisions, recurring pitfalls, and facts that should survive startup.
+- Keep fast-changing execution detail in `SESSION-STATE.md`, `working-buffer.md`, and recent daily notes.
+- If one workspace serves multiple projects, include a date, repo, or project tag when distilling notes into `MEMORY.md` so later lookup stays scoped without introducing a new required schema.
+
+## Memory capture
 
 - Use `templates/memory-capture.md` as a low-friction end-of-task capture sheet.
 - During the task, write rough notes into `working-buffer.md` under `临时决策`, `新坑`, and `待蒸馏`.
@@ -65,11 +82,15 @@ First-time workspace bootstrap is about creating the recovery-layer files with a
 
 ### End-of-task memory capture
 
-End-of-task memory capture keeps the workflow light. Fill `working-buffer.md` while the task is running, then spend 30 seconds after the task wrapping up by pasting the best bits into `memory-capture.md` under `候选决策`, `候选踩坑`, and `候选长期记忆`. The template makes the handoff to `MEMORY.md` or a weekly distillation note explicit without overloading the long-term file.
+End-of-task memory capture keeps the workflow light. Fill `working-buffer.md` while the task is running, then spend 30 seconds after the task wrapping up by pasting the best bits into `memory-capture.md` under `候选决策`, `候选踩坑`, and `候选长期记忆`. The template keeps the handoff to `MEMORY.md` or a weekly distillation note explicit without overloading the long-term file.
 
 ### Distill a daily note into `MEMORY.md`
 
-Daily note distillation closes the loop. Pick the notes you wrote in the latest `memory/YYYY-MM-DD.md`, pull the key decisions and learnings into your `MEMORY.md`, and tag the source with a date or project reference. Keep the daily note for reference, and only copy the distilled insights that other agents or future sessions actually need to recall on startup.
+Daily note distillation closes the loop. Pick the notes you wrote in the latest `memory/YYYY-MM-DD.md`, pull the key decisions and learnings into your `MEMORY.md`, and tag the source with a date or project reference. Keep the daily note for reference, and copy only the distilled insights that other agents or future sessions actually need on startup.
+
+### Memory is not generic RAG
+
+This workflow treats memory as a layered system rather than a single retrieval bucket. `MEMORY.md` is for stable profile and durable collaboration facts; `memory/` keeps raw execution history; Obsidian and optional semantic tools help with deep recall when needed. That keeps the local workflow auditable and portable without turning the repository into a memory API product.
 
 ### Report examples
 

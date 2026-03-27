@@ -6,5 +6,6 @@ __pycache__/
 .skillup-*-current.json
 .skillup-dryrun.json
 .skillup-publish.json
+.skillup-publish-*.json
 .skillup-*-sync.json
 .skillup.local.toml
