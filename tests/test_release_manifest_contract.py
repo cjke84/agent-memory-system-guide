@@ -34,7 +34,7 @@ def test_manifest_parses_and_matches_expected_publish_shape():
 
     assert manifest['name'] == 'Agent Memory System Guide'
     assert manifest['slug'] == 'agent-memory-system-guide'
-    assert manifest['version'] == '1.1.6'
+    assert manifest['version'] == '1.1.7'
     assert manifest['github']['enabled'] is True
     assert manifest['openclaw']['enabled'] is True
     assert manifest['clawhub']['enabled'] is True
