@@ -12,7 +12,7 @@ It helps you build a durable local-first memory stack with a compact `MEMORY.md`
 
 Historical GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
-Registry / published skill version: `1.1.7`
+Registry / published skill version: `1.1.8`
 
 ## What it is
 
