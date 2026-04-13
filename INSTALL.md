@@ -10,6 +10,8 @@ openclaw skills install agent-memory-system-guide
 
 This installs the skill into the active workspace `skills/` directory. That is the preferred path for current OpenClaw versions when you want the skill available in one workspace immediately.
 
+OpenClaw `v2026.4.11` already ships richer native memory capabilities, including Active Memory and newer import/wiki flows. This skill remains useful as a complementary local recovery layer built around readable files such as `MEMORY.md`, daily notes, `SESSION-STATE.md`, and `working-buffer.md`.
+
 ## Post-install self-check
 
 After install, use this lightweight self-check:

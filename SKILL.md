@@ -185,7 +185,7 @@ memory_search(query="相关关键词")
 Agent 每次会话醒来都是空白的。没有记忆文件，你就等于每次失忆重启。记忆系统是 Agent 的“大脑持久化”方案。它不让你变聪明，但让你不犯重复的错误。
 
 这个 skill 的核心定位是本地优先的文件工作流和恢复约定，不是托管式 memory platform。外部检索或语义召回能力只能作为可选后端接在后面，不能替代本地恢复层。
-即使 OpenClaw 新版已经提供 native memory、diary、dreaming 或 grounded recall，这个 skill 仍然负责可审计、可迁移的 local recovery layer，并与这些原生能力互补而不是竞争。
+即使 OpenClaw 新版已经提供 native memory、Active Memory、diary、dreaming、grounded recall，或更新的 import / wiki 流程，这个 skill 仍然负责可审计、可迁移的 local recovery layer，并与这些原生能力互补而不是竞争。
 
 ## 核心架构（本地优先分层）
 

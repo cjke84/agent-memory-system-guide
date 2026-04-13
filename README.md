@@ -39,10 +39,10 @@ Best fit:
 
 ## OpenClaw compatibility
 
-- Baseline tested and documented against OpenClaw `v2026.4.9` (released 2026-04-09).
+- Baseline tested and documented against OpenClaw `v2026.4.11` (released 2026-04-12).
 - The skill format here follows the current OpenClaw Skills contract: `SKILL.md` frontmatter, workspace `skills/` install flow, and portable file-first recovery.
 - Core workflow remains useful on older OpenClaw versions as long as plain `SKILL.md` loading works, but the clearest install path is the newer `openclaw skills install <slug>` flow.
-- OpenClaw native memory, diary, grounded recall, and dreaming are complementary layers; this repository remains the local recovery layer you can read, sync, audit, and back up directly.
+- OpenClaw native memory, Active Memory, diary, grounded recall, dreaming, and newer import/wiki flows are complementary layers; this repository remains the local recovery layer you can read, sync, audit, and back up directly.
 
 ## Post-install self-check
 

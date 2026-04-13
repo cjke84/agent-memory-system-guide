@@ -177,16 +177,16 @@ def test_readmes_document_compatibility_and_post_install_self_check():
     readme_en_text = (repo_root / 'README_EN.md').read_text(encoding='utf-8')
 
     assert '## OpenClaw compatibility' in readme_text
-    assert '2026.4.9' in readme_text
+    assert '2026.4.11' in readme_text
     assert '## Post-install self-check' in readme_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_text
 
     assert '## OpenClaw 兼容说明' in readme_cn_text
-    assert '2026.4.9' in readme_cn_text
+    assert '2026.4.11' in readme_cn_text
     assert '## 安装后自检' in readme_cn_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_cn_text
 
     assert '## OpenClaw compatibility' in readme_en_text
-    assert '2026.4.9' in readme_en_text
+    assert '2026.4.11' in readme_en_text
     assert '## Post-install self-check' in readme_en_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_en_text
