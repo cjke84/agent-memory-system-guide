@@ -166,9 +166,19 @@ memory_search(query="相关关键词")
 
 首次引导工作区就当是开箱即用：复制 `templates/SESSION-STATE.md`、`templates/working-buffer.md` 和 `templates/memory-capture.md`，再跑一遍 `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`（`bootstrap` 可以省略，默认行为一致），此时 `SESSION-STATE.md`、`working-buffer.md` 和 `memory-capture.md` 都已经齐活了。`MEMORY.md` 仍然建议手动建立和维护，因为它属于长期记忆主文件，不应该被脚本悄悄代写。
 
+### 会话启动初始化
+
+如果你想从真实会话的第 1 轮就把恢复层准备好，可以运行 `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace`。它会确保基础恢复文件存在，并给 `memory-capture.md` 补上结构化 capture metadata；需要时还可以传 `--session-id`、`--project` 和重复的 `--scope-tag`。
+
 ### 任务结束记忆捕获
 
 在任务进行中写 `working-buffer.md` 的 `临时决策`/`新坑`/`待蒸馏`，任务结束前 30 秒用 `templates/memory-capture.md` 的 `候选决策`、`候选踩坑`、`候选长期记忆` 把最重要的内容整理出来，再决定哪些内容最终写入 `MEMORY.md`。这个环节让临时笔记和长期记忆的边界清晰且不会掉链子。
+
+如果你想先做一层机器可读但仍然人工复核的整理，可以运行 `python3 scripts/memory_capture.py distill --workspace /path/to/workspace`。它会把候选内容整理成 `suggested_memory`、`recovery_only` 和 `follow_up`。
+
+如果要把这一步交给别人复核，再加 `--output /path/to/distill-report.md`。输出的 Markdown 会带上 `candidate_document_id`，并按 `候选决策`、`候选踩坑`、`候选长期记忆` 分段展示建议写入长期记忆的内容。
+
+如果你想把这条链路真正闭环，再运行 `python3 scripts/memory_capture.py apply --workspace /path/to/workspace`。它会把当前 distill 结果写进 `MEMORY.md`，并通过 `candidate_document_id` 保证重复执行不会重复写入。
 
 ### 每日笔记蒸馏
 
@@ -177,6 +187,8 @@ memory_search(query="相关关键词")
 ### 维护报告命令
 
 `report command` 用来检查工作区当前状态，**永远不会**写入记忆文件。运行 `python3 scripts/memory_capture.py report --workspace /path/to/workspace`，它会输出四节：**Supported files**（`MEMORY.md`、`SESSION-STATE.md`、`working-buffer.md`、`memory-capture.md`）、**Directories**（递归扫描 `memory/` 和 `attachments/`，在 memory/ 里只统计形如 `YYYY-MM-DD.md` 的 daily notes，在 attachments/ 里数所有文件）、**Latest daily note**（选取 `memory/` 下字典序最新的匹配 daily note 路径）、**Warnings**（比如某个文件缺失或者权限异常）。像 `memory/index.md` 这样的参考页不会被当成 latest daily note。报告命令只在工作区目录不存在或无法读取时退出非 0；其它情况下即便有警告也返回 0。supported files、directories、latest daily note 以及 warnings 是报告里每条节的标题，方便快速对照命令输出。
+
+`doctor` 用来做按作用域收敛的健康检查。运行 `python3 scripts/memory_capture.py doctor --workspace /path/to/workspace` 时，默认只检查当前启用的本地恢复层；如果这次工作流确实在用 Obsidian，再显式加上 `--obsidian-vault /path/to/vault`。
 
 ---
 

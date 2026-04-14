@@ -25,8 +25,15 @@ SUPPORTED_DIRECTORIES = (
     "attachments",
 )
 ARCHIVE_VERSION = 1
-SUBCOMMANDS = {"bootstrap", "export", "import", "report"}
+SUBCOMMANDS = {"bootstrap", "session-start", "export", "import", "report", "doctor", "distill", "apply"}
 DAILY_NOTE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
+PLACEHOLDER_PREFIXES = (
+    "这次有没有",
+    "哪些事实会持续影响后续协作",
+    "这次记忆属于哪个项目",
+    "如果现在中断",
+    "哪些内容只需要写进",
+)
 
 
 def iso_now() -> str:
@@ -35,6 +42,17 @@ def iso_now() -> str:
 
 def timestamp_slug(timestamp: str) -> str:
     return "".join(char for char in timestamp if char.isdigit())
+
+
+def slug_fragment(value: str, fallback: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-")
+    return normalized or fallback
+
+
+def candidate_document_id(metadata: CaptureMetadata, generated_at: str) -> str:
+    project = slug_fragment(metadata.project, "memory")
+    session = slug_fragment(metadata.source_session, "session")
+    return f"{project}__{session}__{timestamp_slug(generated_at)}"
 
 
 def read_template(repo_root: Path, name: str) -> str:
@@ -48,11 +66,23 @@ def ensure_file(path: Path, content: str) -> str:
     return "created"
 
 
-def build_capture_content(repo_root: Path, generated_at: str) -> str:
+def build_capture_content(
+    repo_root: Path,
+    generated_at: str,
+    metadata: CaptureMetadata,
+) -> str:
     template = read_template(repo_root, "memory-capture.md").rstrip() + "\n"
+    scope_tags = ", ".join(metadata.scope_tags)
     return (
         "# memory-capture.md\n\n"
         f"> Generated at: {generated_at}\n\n"
+        "## Capture metadata\n"
+        f"- session_started_at: {metadata.session_started_at}\n"
+        f"- project: {metadata.project}\n"
+        f"- scope_tags: {scope_tags}\n"
+        f"- source_session: {metadata.source_session}\n"
+        f"- candidate_document_id: {candidate_document_id(metadata, generated_at)}\n"
+        "- stability: review\n\n"
         f"{template}"
     )
 
@@ -61,6 +91,7 @@ def write_capture_file(
     workspace: Path,
     generated_at: str,
     repo_root: Path,
+    metadata: CaptureMetadata,
     *,
     refresh: bool,
 ) -> str:
@@ -68,7 +99,10 @@ def write_capture_file(
     if capture_path.exists() and not refresh:
         return "kept"
     existed = capture_path.exists()
-    capture_path.write_text(build_capture_content(repo_root, generated_at), encoding="utf-8")
+    capture_path.write_text(
+        build_capture_content(repo_root, generated_at, metadata),
+        encoding="utf-8",
+    )
     if refresh and existed:
         return "refreshed"
     return "created"
@@ -90,6 +124,19 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Overwrite memory-capture.md with a regenerated capture sheet.",
     )
+    add_capture_metadata_arguments(bootstrap)
+
+    session_start = subparsers.add_parser(
+        "session-start",
+        help="Ensure recovery files exist at the beginning of a session.",
+    )
+    add_workspace_arguments(session_start)
+    session_start.add_argument(
+        "--refresh-capture",
+        action="store_true",
+        help="Overwrite memory-capture.md with a regenerated capture sheet.",
+    )
+    add_capture_metadata_arguments(session_start)
 
     export_parser = subparsers.add_parser(
         "export",
@@ -131,6 +178,43 @@ def build_parser() -> argparse.ArgumentParser:
         "--output",
         help="Optional Markdown file path for the report.",
     )
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Run scoped health checks for the active local memory layers.",
+    )
+    add_workspace_arguments(doctor_parser, include_generated_at=False)
+    doctor_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the doctor payload as JSON to stdout.",
+    )
+    doctor_parser.add_argument(
+        "--output",
+        help="Optional Markdown file path for the doctor report.",
+    )
+    doctor_parser.add_argument(
+        "--obsidian-vault",
+        help="Optional Obsidian vault path to check when Obsidian is actively in use.",
+    )
+    distill_parser = subparsers.add_parser(
+        "distill",
+        help="Summarize candidate memory into review-ready buckets without editing MEMORY.md.",
+    )
+    add_workspace_arguments(distill_parser, include_generated_at=False)
+    distill_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the distill payload as JSON to stdout.",
+    )
+    distill_parser.add_argument(
+        "--output",
+        help="Optional Markdown file path for the distill summary.",
+    )
+    apply_parser = subparsers.add_parser(
+        "apply",
+        help="Write distilled candidate memory into MEMORY.md using idempotent document ids.",
+    )
+    add_workspace_arguments(apply_parser, include_generated_at=False)
     return parser
 
 
@@ -145,6 +229,23 @@ def add_workspace_arguments(parser: argparse.ArgumentParser, include_generated_a
             "--generated-at",
             help="Optional timestamp used in generated files and archive metadata.",
         )
+
+
+def add_capture_metadata_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--session-id",
+        help="Optional session identifier used to scope the current capture sheet.",
+    )
+    parser.add_argument(
+        "--project",
+        help="Optional project or repository name for the current capture sheet.",
+    )
+    parser.add_argument(
+        "--scope-tag",
+        action="append",
+        default=[],
+        help="Repeatable scope tag used to label the current capture sheet.",
+    )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -176,6 +277,35 @@ class ReportData:
     attachments_count: int
     latest_daily_note: Path | None
     warnings: list[str]
+
+
+@dataclass
+class CaptureMetadata:
+    session_started_at: str
+    project: str
+    scope_tags: list[str]
+    source_session: str
+
+
+@dataclass
+class DoctorCheck:
+    status: str
+    warnings: list[str]
+
+
+@dataclass
+class DistillData:
+    metadata: dict[str, object]
+    suggested_memory: list[dict[str, str]]
+    recovery_only: list[str]
+    follow_up: list[str]
+
+
+MEMORY_FILE_HEADER = (
+    "# MEMORY.md\n\n"
+    "> Long-term memory. Distill stable facts, preferences, and decisions here.\n\n"
+    "## Distilled Memory Entries\n"
+)
 
 
 def collect_report_data(workspace: Path) -> ReportData:
@@ -216,6 +346,15 @@ def collect_report_data(workspace: Path) -> ReportData:
         attachments_count=attachments_count,
         latest_daily_note=latest_daily_note,
         warnings=warnings,
+    )
+
+
+def capture_metadata_from_args(args: argparse.Namespace, generated_at: str) -> CaptureMetadata:
+    return CaptureMetadata(
+        session_started_at=generated_at,
+        project=getattr(args, "project", "") or "",
+        scope_tags=list(getattr(args, "scope_tag", []) or []),
+        source_session=getattr(args, "session_id", "") or "",
     )
 
 
@@ -304,6 +443,109 @@ def report_payload(data: ReportData) -> dict[str, object]:
     }
 
 
+def parse_capture_sections(capture_text: str) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    current_section: str | None = None
+    for raw_line in capture_text.splitlines():
+        line = raw_line.strip()
+        if line.startswith("## "):
+            current_section = line[3:].strip()
+            sections.setdefault(current_section, [])
+            continue
+        if not current_section:
+            continue
+        if line.startswith("- "):
+            sections[current_section].append(line[2:].strip())
+    return sections
+
+
+def is_placeholder_item(item: str) -> bool:
+    normalized = item.strip()
+    if not normalized:
+        return True
+    if normalized.startswith("`volatile`、`review`、`stable`"):
+        return True
+    return normalized.startswith(PLACEHOLDER_PREFIXES)
+
+
+def split_scope_tags(raw_tags: str) -> list[str]:
+    if not raw_tags:
+        return []
+    return [part.strip() for part in raw_tags.split(",") if part.strip()]
+
+
+def collect_distill_data(workspace: Path) -> DistillData:
+    capture_path = workspace / "memory-capture.md"
+    if not capture_path.is_file():
+        raise FileNotFoundError(f"memory-capture.md does not exist: {capture_path}")
+    sections = parse_capture_sections(capture_path.read_text(encoding="utf-8"))
+
+    metadata_pairs: dict[str, str] = {}
+    for item in sections.get("Capture metadata", []):
+        if ":" not in item:
+            continue
+        key, value = item.split(":", 1)
+        metadata_pairs[key.strip()] = value.strip()
+
+    scope_tags = split_scope_tags(metadata_pairs.get("scope_tags", ""))
+    for extra_tag in sections.get("候选标签", []):
+        if not is_placeholder_item(extra_tag):
+            scope_tags.append(extra_tag)
+
+    deduped_tags: list[str] = []
+    for tag in scope_tags:
+        if tag not in deduped_tags:
+            deduped_tags.append(tag)
+
+    stability = metadata_pairs.get("stability", "")
+    for item in sections.get("候选稳定性", []):
+        if not is_placeholder_item(item):
+            stability = item
+
+    suggested_memory: list[dict[str, str]] = []
+    seen_suggestions: set[tuple[str, str]] = set()
+    for bucket in ("候选决策", "候选踩坑", "候选长期记忆"):
+        for item in sections.get(bucket, []):
+            if is_placeholder_item(item):
+                continue
+            signature = (bucket, item)
+            if signature in seen_suggestions:
+                continue
+            seen_suggestions.add(signature)
+            suggested_memory.append(
+                {
+                    "bucket": bucket,
+                    "text": item,
+                    "project": metadata_pairs.get("project", ""),
+                    "source_session": metadata_pairs.get("source_session", ""),
+                    "stability": stability,
+                }
+            )
+
+    recovery_only = [
+        item for item in sections.get("只留在当前恢复层", [])
+        if not is_placeholder_item(item)
+    ]
+    follow_up = [
+        item for item in sections.get("明日续接", [])
+        if not is_placeholder_item(item)
+    ]
+
+    return DistillData(
+        metadata={
+            "project": metadata_pairs.get("project", ""),
+            "source_session": metadata_pairs.get("source_session", ""),
+            "session_started_at": metadata_pairs.get("session_started_at", ""),
+            "candidate_document_id": metadata_pairs.get("candidate_document_id", ""),
+            "scope_tags": deduped_tags,
+            "stability": stability,
+        },
+        suggested_memory=suggested_memory,
+        recovery_only=recovery_only,
+        follow_up=follow_up,
+    )
+
+
 def relative_archive_name(path: Path, workspace: Path) -> str:
     return path.relative_to(workspace).as_posix()
 
@@ -377,7 +619,14 @@ def safe_members_from_manifest(archive: zipfile.ZipFile) -> list[str]:
     return safe_paths
 
 
-def create_bootstrap_files(workspace: Path, generated_at: str, repo_root: Path) -> None:
+def create_bootstrap_files(
+    workspace: Path,
+    generated_at: str,
+    repo_root: Path,
+    *,
+    metadata: CaptureMetadata,
+    refresh_capture: bool,
+) -> None:
     session_status = ensure_file(
         workspace / "SESSION-STATE.md",
         read_template(repo_root, "SESSION-STATE.md"),
@@ -391,7 +640,8 @@ def create_bootstrap_files(workspace: Path, generated_at: str, repo_root: Path) 
         workspace,
         generated_at,
         repo_root,
-        refresh=False,
+        metadata,
+        refresh=refresh_capture,
     )
 
     print(f"SESSION-STATE.md: {session_status}")
@@ -403,26 +653,28 @@ def handle_bootstrap(args: argparse.Namespace, repo_root: Path) -> int:
     workspace = Path(args.workspace).expanduser().resolve()
     workspace.mkdir(parents=True, exist_ok=True)
     generated_at = args.generated_at or iso_now()
-    if args.refresh_capture:
-        session_status = ensure_file(
-            workspace / "SESSION-STATE.md",
-            read_template(repo_root, "SESSION-STATE.md"),
-        )
-        buffer_status = ensure_file(
-            workspace / "working-buffer.md",
-            read_template(repo_root, "working-buffer.md"),
-        )
-        capture_status = write_capture_file(
-            workspace,
-            generated_at,
-            repo_root,
-            refresh=True,
-        )
-        print(f"SESSION-STATE.md: {session_status}")
-        print(f"working-buffer.md: {buffer_status}")
-        print(f"memory-capture.md: {capture_status}")
-        return 0
-    create_bootstrap_files(workspace, generated_at, repo_root)
+    create_bootstrap_files(
+        workspace,
+        generated_at,
+        repo_root,
+        metadata=capture_metadata_from_args(args, generated_at),
+        refresh_capture=args.refresh_capture,
+    )
+    return 0
+
+
+def handle_session_start(args: argparse.Namespace, repo_root: Path) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    workspace.mkdir(parents=True, exist_ok=True)
+    generated_at = args.generated_at or iso_now()
+    create_bootstrap_files(
+        workspace,
+        generated_at,
+        repo_root,
+        metadata=capture_metadata_from_args(args, generated_at),
+        refresh_capture=args.refresh_capture,
+    )
+    print("Session start: ready")
     return 0
 
 
@@ -533,17 +785,291 @@ def handle_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def doctor_checks(workspace: Path, obsidian_vault: str | None) -> dict[str, DoctorCheck]:
+    report_data = collect_report_data(workspace)
+    checks = {
+        "local_recovery": DoctorCheck(
+            status="ok" if not report_data.warnings else "warn",
+            warnings=report_data.warnings,
+        )
+    }
+    if obsidian_vault:
+        vault_path = Path(obsidian_vault).expanduser().resolve()
+        warnings: list[str] = []
+        if not vault_path.exists():
+            warnings.append(f"Obsidian vault does not exist: {vault_path}")
+        elif not vault_path.is_dir():
+            warnings.append(f"Obsidian vault is not a directory: {vault_path}")
+        checks["obsidian"] = DoctorCheck(
+            status="ok" if not warnings else "warn",
+            warnings=warnings,
+        )
+    return checks
+
+
+def doctor_payload(workspace: Path, checks: dict[str, DoctorCheck]) -> dict[str, object]:
+    return {
+        "workspace": str(workspace),
+        "checks": {
+            name: {
+                "status": check.status,
+                "warnings": check.warnings,
+            }
+            for name, check in checks.items()
+        },
+    }
+
+
+def format_doctor_text(workspace: Path, checks: dict[str, DoctorCheck]) -> str:
+    lines: list[str] = [f"Memory workspace doctor for {workspace}", ""]
+    for name, check in checks.items():
+        lines.append(f"{name}: {check.status}")
+        if check.warnings:
+            lines.extend(f"  - {warning}" for warning in check.warnings)
+        else:
+            lines.append("  - none")
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_doctor_markdown(workspace: Path, checks: dict[str, DoctorCheck]) -> str:
+    lines: list[str] = [
+        "# Memory workspace doctor",
+        "",
+        f"- Workspace: {workspace}",
+        "",
+    ]
+    for name, check in checks.items():
+        lines.append(f"## {name}")
+        lines.append(f"- status: {check.status}")
+        lines.append("- warnings:")
+        if check.warnings:
+            lines.extend(f"  - {warning}" for warning in check.warnings)
+        else:
+            lines.append("  - none")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def handle_doctor(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    if not workspace.is_dir():
+        print(f"Workspace does not exist: {workspace}", file=sys.stderr)
+        return 1
+    checks = doctor_checks(workspace, args.obsidian_vault)
+    if args.json:
+        print(json.dumps(doctor_payload(workspace, checks), ensure_ascii=False, indent=2))
+    else:
+        print(format_doctor_text(workspace, checks))
+    if args.output:
+        destination = Path(args.output).expanduser().resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(format_doctor_markdown(workspace, checks), encoding="utf-8")
+        if not args.json:
+            print(f"Doctor report written: {destination}")
+    return 0
+
+
+def distill_payload(workspace: Path, data: DistillData) -> dict[str, object]:
+    return {
+        "workspace": str(workspace),
+        "metadata": data.metadata,
+        "suggested_memory": data.suggested_memory,
+        "recovery_only": data.recovery_only,
+        "follow_up": data.follow_up,
+    }
+
+
+def format_distill_text(data: DistillData) -> str:
+    lines = ["Memory capture distill", ""]
+    lines.append(f"Project: {data.metadata.get('project', '') or 'none'}")
+    lines.append(f"Session: {data.metadata.get('source_session', '') or 'none'}")
+    lines.append(
+        "Scope tags: "
+        + (", ".join(data.metadata.get("scope_tags", [])) or "none")
+    )
+    lines.append(f"Stability: {data.metadata.get('stability', '') or 'review'}")
+    lines.append("")
+    lines.append("Suggested memory:")
+    if data.suggested_memory:
+        for item in data.suggested_memory:
+            lines.append(f"  - [{item['bucket']}] {item['text']}")
+    else:
+        lines.append("  - none")
+    lines.append("")
+    lines.append("Recovery only:")
+    if data.recovery_only:
+        lines.extend(f"  - {item}" for item in data.recovery_only)
+    else:
+        lines.append("  - none")
+    lines.append("")
+    lines.append("Follow up:")
+    if data.follow_up:
+        lines.extend(f"  - {item}" for item in data.follow_up)
+    else:
+        lines.append("  - none")
+    return "\n".join(lines)
+
+
+def format_distill_markdown(workspace: Path, data: DistillData) -> str:
+    lines = [
+        "# Memory capture distill",
+        "",
+        f"- Workspace: {workspace}",
+        f"- Project: {data.metadata.get('project', '') or 'none'}",
+        f"- Session: {data.metadata.get('source_session', '') or 'none'}",
+        f"- Document ID: `{data.metadata.get('candidate_document_id', '') or 'none'}`",
+        f"- Stability: {data.metadata.get('stability', '') or 'review'}",
+        "",
+        "## Scope tags",
+    ]
+    tags = data.metadata.get("scope_tags", [])
+    if tags:
+        lines.extend(f"- {tag}" for tag in tags)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Suggested memory"])
+    bucket_order = ("候选决策", "候选踩坑", "候选长期记忆")
+    if data.suggested_memory:
+        by_bucket = {
+            bucket: [item["text"] for item in data.suggested_memory if item["bucket"] == bucket]
+            for bucket in bucket_order
+        }
+        for bucket in bucket_order:
+            if not by_bucket[bucket]:
+                continue
+            lines.append(f"### {bucket}")
+            lines.extend(f"- {text}" for text in by_bucket[bucket])
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Recovery only"])
+    if data.recovery_only:
+        lines.extend(f"- {item}" for item in data.recovery_only)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Follow up"])
+    if data.follow_up:
+        lines.extend(f"- {item}" for item in data.follow_up)
+    else:
+        lines.append("- none")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def ensure_memory_file(path: Path) -> str:
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    return MEMORY_FILE_HEADER
+
+
+def memory_entry_markdown(data: DistillData) -> str:
+    document_id = data.metadata.get("candidate_document_id", "") or "none"
+    project = data.metadata.get("project", "") or "none"
+    session = data.metadata.get("source_session", "") or "none"
+    stability = data.metadata.get("stability", "") or "review"
+    tags = data.metadata.get("scope_tags", [])
+    lines = [
+        f"### Entry `{document_id}`",
+        f"- Project: {project}",
+        f"- Session: {session}",
+        f"- Stability: {stability}",
+        "- Scope tags: " + (", ".join(tags) if tags else "none"),
+        "",
+    ]
+    bucket_order = ("候选决策", "候选踩坑", "候选长期记忆")
+    by_bucket = {
+        bucket: [item["text"] for item in data.suggested_memory if item["bucket"] == bucket]
+        for bucket in bucket_order
+    }
+    for bucket in bucket_order:
+        if not by_bucket[bucket]:
+            continue
+        lines.append(f"### {bucket}")
+        lines.extend(f"- {text}" for text in by_bucket[bucket])
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def handle_apply(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    if not workspace.is_dir():
+        print(f"Workspace does not exist: {workspace}", file=sys.stderr)
+        return 1
+    try:
+        data = collect_distill_data(workspace)
+    except FileNotFoundError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    document_id = data.metadata.get("candidate_document_id", "") or ""
+    if not document_id:
+        print("Distill data is missing candidate_document_id.", file=sys.stderr)
+        return 1
+    if not data.suggested_memory:
+        print("Applied distilled memory: 0 entries added, 0 skipped")
+        return 0
+
+    memory_path = workspace / "MEMORY.md"
+    memory_text = ensure_memory_file(memory_path)
+    if document_id in memory_text:
+        print("Applied distilled memory: 0 entries added, 1 skipped")
+        return 0
+
+    if not memory_text.endswith("\n"):
+        memory_text += "\n"
+    if "## Distilled Memory Entries" not in memory_text:
+        memory_text += "\n## Distilled Memory Entries\n"
+    if not memory_text.endswith("\n\n"):
+        memory_text += "\n"
+    memory_text += memory_entry_markdown(data)
+    memory_path.write_text(memory_text, encoding="utf-8")
+    print("Applied distilled memory: 1 entry added, 0 skipped")
+    return 0
+
+
+def handle_distill(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    if not workspace.is_dir():
+        print(f"Workspace does not exist: {workspace}", file=sys.stderr)
+        return 1
+    try:
+        data = collect_distill_data(workspace)
+    except FileNotFoundError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+    payload = distill_payload(workspace, data)
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print(format_distill_text(data))
+    if args.output:
+        destination = Path(args.output).expanduser().resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(format_distill_markdown(workspace, data), encoding="utf-8")
+        if not args.json:
+            print(f"Distill report written: {destination}")
+    return 0
+
+
 def main() -> int:
     args = parse_args()
     repo_root = Path(__file__).resolve().parents[1]
     if args.command == "bootstrap":
         return handle_bootstrap(args, repo_root)
+    if args.command == "session-start":
+        return handle_session_start(args, repo_root)
     if args.command == "export":
         return handle_export(args)
     if args.command == "import":
         return handle_import(args)
     if args.command == "report":
         return handle_report(args)
+    if args.command == "doctor":
+        return handle_doctor(args)
+    if args.command == "distill":
+        return handle_distill(args)
+    if args.command == "apply":
+        return handle_apply(args)
     print(f"Unsupported command: {args.command}", file=sys.stderr)
     return 1
 

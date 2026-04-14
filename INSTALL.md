@@ -19,7 +19,8 @@ After install, use this lightweight self-check:
 1. Confirm the skill is visible in your current OpenClaw workspace skill list.
 2. Run `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`.
 3. Confirm the workspace now has `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md`.
-4. Optionally run `python3 scripts/memory_capture.py report --workspace /path/to/workspace` to verify the workspace surface and warnings.
+4. Optionally run `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace` to initialize recovery metadata from turn 1.
+5. Optionally run `python3 scripts/memory_capture.py distill --workspace /path/to/workspace` and `python3 scripts/memory_capture.py apply --workspace /path/to/workspace` to verify the full capture-to-memory loop.
 
 ## Manual / agent-assisted install
 
@@ -33,4 +34,4 @@ Please install agent-memory-system-guide as a usable skill. Keep SKILL.md, READM
 
 Historical GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
 
-Registry / published skill version: `1.1.8`
+Registry / published skill version: `1.2.0`

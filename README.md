@@ -14,7 +14,7 @@ Canonical OpenClaw skill id: `memory-system`
 - [中文介绍](README_CN.md)
 - [Install Skill for Agent](INSTALL.md)
 - Historical GitHub release archive: [v0.1.0](https://github.com/cjke84/agent-memory-system-guide/releases/tag/v0.1.0)
-- Registry / published skill version: `1.1.8`
+- Registry / published skill version: `1.2.0`
 
 ## What it is
 
@@ -48,8 +48,9 @@ Best fit:
 
 1. Confirm the skill appears in your current OpenClaw workspace.
 2. Run `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`.
-3. Confirm `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md` were created or kept as expected.
-4. Run `python3 scripts/memory_capture.py report --workspace /path/to/workspace` if you want a quick health summary.
+3. Run `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace` when you want the recovery layer initialized from turn 1 of a real session.
+4. Confirm `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md` were created or kept as expected.
+5. Run `python3 scripts/memory_capture.py report --workspace /path/to/workspace`, `python3 scripts/memory_capture.py doctor --workspace /path/to/workspace`, or `python3 scripts/memory_capture.py distill --workspace /path/to/workspace` depending on whether you want status, health checks, or a review-ready memory summary.
 
 ## File boundaries
 
@@ -85,7 +86,9 @@ Practical boundary:
 - Use `templates/memory-capture.md` as a low-friction end-of-task capture sheet.
 - During the task, write rough notes into `working-buffer.md` under `临时决策`, `新坑`, and `待蒸馏`.
 - After the task, spend 30 seconds turning those rough notes into candidate memory instead of forcing a full `MEMORY.md` rewrite.
-- To bootstrap those files in a real workspace, run `python3 scripts/memory_capture.py --workspace /path/to/workspace` or `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`.
+- Use `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace` to initialize the recovery layer at session start, or `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace` for one-time setup.
+- The generated `memory-capture.md` now carries structured capture metadata such as `session_started_at`, `project`, `scope_tags`, `source_session`, a stable `candidate_document_id`, and a `stability` marker.
+- Use `python3 scripts/memory_capture.py distill --workspace /path/to/workspace` to turn the filled capture sheet into a review-ready summary, then `python3 scripts/memory_capture.py apply --workspace /path/to/workspace` to write the deduplicated result into `MEMORY.md`.
 
 ## Practical Examples
 
@@ -94,6 +97,10 @@ Practical boundary:
 ### First-time workspace bootstrap
 
 First-time workspace bootstrap is about creating the recovery-layer files with a single command. Copy the templates for `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md`, then run `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace` (or omit `bootstrap` for the default bootstrap path) so the helper creates `SESSION-STATE.md`, `working-buffer.md`, and a refreshed `memory-capture.md` in one go. Keep `MEMORY.md` as a deliberate, user-maintained file.
+
+### Session-start initialization
+
+Run `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace` when a real session begins and you want the local recovery layer ready from turn 1. You can optionally add `--session-id`, `--project`, and repeated `--scope-tag` arguments so the generated `memory-capture.md` includes lightweight structured context and a stable `candidate_document_id`.
 
 ### End-of-task memory capture
 
@@ -112,6 +119,20 @@ This workflow treats memory as a layered system rather than a single retrieval b
 ### Maintenance report command
 
 `python3 scripts/memory_capture.py report --workspace /path/to/workspace` collects the current workspace picture and helps you keep it honest. The report command always exits 0 when it can read the workspace; it only returns a non-zero status if the directory does not exist or cannot be read. Its stdout and Markdown outputs share four sections: **Supported files**, **Directories**, **Latest daily note**, and **Warnings**. Supported files are `MEMORY.md`, `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md`; the scanned directories are `memory/` and `attachments/`. The report counts every file inside `attachments/` recursively and only date-named daily notes like `YYYY-MM-DD.md` under `memory/`, then identifies the lexicographically latest matching daily-note path as the latest daily note. Non-daily Markdown files in `memory/` are ignored so index or reference notes do not skew the maintenance summary.
+
+### Doctor command
+
+`python3 scripts/memory_capture.py doctor --workspace /path/to/workspace` runs a scoped health check that defaults to the active local recovery layer only. If Obsidian is actively part of the workflow, add `--obsidian-vault /path/to/vault` so `doctor` checks that layer too instead of warning about optional integrations you are not using.
+
+### Distill command
+
+`python3 scripts/memory_capture.py distill --workspace /path/to/workspace` reads the current `memory-capture.md` and produces a review-ready summary with `suggested_memory`, `recovery_only`, and `follow_up` buckets. It reuses the structured metadata already embedded in the capture sheet, folds in candidate tags, and ignores untouched template prompt lines so an empty template does not create noisy pseudo-memories.
+
+Add `--output /path/to/distill-report.md` when you want a Markdown review artifact. The Markdown report includes the `candidate_document_id`, groups suggested memory by bucket (`候选决策`, `候选踩坑`, `候选长期记忆`), and keeps recovery-only and follow-up items separate so a human can review the capture sheet quickly.
+
+### Apply command
+
+`python3 scripts/memory_capture.py apply --workspace /path/to/workspace` closes the loop by writing the current distilled memory into `MEMORY.md`. It creates `MEMORY.md` if needed, writes only the long-term candidate buckets, and skips re-applying an entry when the same `candidate_document_id` is already present, so repeated runs stay idempotent.
 
 Example stdout:
 
@@ -250,7 +271,7 @@ Weekly backup example with `crontab`:
 
 Practical rule:
 - Schedule checks, reports, and backups automatically.
-- Do not automatically write distilled content into `MEMORY.md`; keep that review step manual.
+- Use `distill` for review and `apply` for the explicit write step; avoid hidden background rewrites of `MEMORY.md`.
 
 ## Sync options and trade-offs
 

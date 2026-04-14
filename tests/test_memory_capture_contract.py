@@ -22,6 +22,8 @@ def test_memory_capture_template_exists():
     assert '候选决策' in template_text
     assert '候选踩坑' in template_text
     assert '候选长期记忆' in template_text
+    assert '候选标签' in template_text
+    assert '候选稳定性' in template_text
 
 
 def test_readmes_document_cross_device_backup_restore():
@@ -78,6 +80,11 @@ def test_readme_documents_memory_workflow_examples():
     assert '### Workflow examples' in readme_text
     assert '### Report examples' in readme_text
     assert 'Maintenance report command' in readme_text
+    assert 'session-start' in readme_text
+    assert 'doctor' in readme_text
+    assert 'distill' in readme_text
+    assert 'apply' in readme_text
+    assert 'candidate_document_id' in readme_text
     assert 'python3 scripts/memory_capture.py report' in readme_text
     assert 'Memory workspace report for /path/to/workspace' in readme_text
     assert 'Missing supported file: SESSION-STATE.md' in readme_text
@@ -108,6 +115,11 @@ def test_bilingual_readmes_cover_examples_and_report():
     assert '### 工作流示例' in readme_cn_text
     assert '### 报告示例' in readme_cn_text
     assert '维护报告' in readme_cn_text
+    assert 'session-start' in readme_cn_text
+    assert 'doctor' in readme_cn_text
+    assert 'distill' in readme_cn_text
+    assert 'apply' in readme_cn_text
+    assert 'candidate_document_id' in readme_cn_text
     assert 'Memory workspace report for /path/to/workspace' in readme_cn_text
     assert 'Missing supported file: SESSION-STATE.md' in readme_cn_text
     assert 'workspace-report.md' in readme_cn_text
@@ -127,6 +139,11 @@ def test_bilingual_readmes_cover_examples_and_report():
     assert '### Workflow examples' in readme_en_text
     assert '### Report examples' in readme_en_text
     assert 'maintenance report command' in readme_en_text
+    assert 'session-start' in readme_en_text
+    assert 'doctor' in readme_en_text
+    assert 'distill' in readme_en_text
+    assert 'apply' in readme_en_text
+    assert 'candidate_document_id' in readme_en_text
     assert 'Memory workspace report for /path/to/workspace' in readme_en_text
     assert 'Missing supported file: SESSION-STATE.md' in readme_en_text
     assert 'workspace-report.md' in readme_en_text
@@ -146,7 +163,7 @@ def test_skill_mentions_obsidian_setup_and_scheduled_maintenance():
     assert 'attachments/' in skill_text
     assert 'Dataview' in skill_text
     assert 'crontab' in skill_text
-    assert '不要自动写入 `MEMORY.md`' in skill_text
+    assert 'apply' in skill_text
     assert '同步取舍' in skill_text
     assert 'Obsidian Sync' in skill_text
     assert 'Syncthing' in skill_text
@@ -157,6 +174,10 @@ def test_skill_mentions_report_command():
     skill_text = (repo_root / 'SKILL.md').read_text(encoding='utf-8')
 
     assert 'report command' in skill_text
+    assert 'session-start' in skill_text
+    assert 'doctor' in skill_text
+    assert 'distill' in skill_text
+    assert 'apply' in skill_text
     assert 'supported files' in skill_text
     assert 'python3 scripts/memory_capture.py report' in skill_text
 
@@ -180,13 +201,22 @@ def test_readmes_document_compatibility_and_post_install_self_check():
     assert '2026.4.11' in readme_text
     assert '## Post-install self-check' in readme_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_text
+    assert 'python3 scripts/memory_capture.py session-start --workspace /path/to/workspace' in readme_text
+    assert 'python3 scripts/memory_capture.py distill --workspace /path/to/workspace' in readme_text
+    assert 'python3 scripts/memory_capture.py apply --workspace /path/to/workspace' in readme_text
 
     assert '## OpenClaw 兼容说明' in readme_cn_text
     assert '2026.4.11' in readme_cn_text
     assert '## 安装后自检' in readme_cn_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_cn_text
+    assert 'python3 scripts/memory_capture.py session-start --workspace /path/to/workspace' in readme_cn_text
+    assert 'python3 scripts/memory_capture.py distill --workspace /path/to/workspace' in readme_cn_text
+    assert 'python3 scripts/memory_capture.py apply --workspace /path/to/workspace' in readme_cn_text
 
     assert '## OpenClaw compatibility' in readme_en_text
     assert '2026.4.11' in readme_en_text
     assert '## Post-install self-check' in readme_en_text
     assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_en_text
+    assert 'python3 scripts/memory_capture.py session-start --workspace /path/to/workspace' in readme_en_text
+    assert 'python3 scripts/memory_capture.py distill --workspace /path/to/workspace' in readme_en_text
+    assert 'python3 scripts/memory_capture.py apply --workspace /path/to/workspace' in readme_en_text
