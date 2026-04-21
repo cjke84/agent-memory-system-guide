@@ -32,9 +32,8 @@ def test_readmes_document_cross_device_backup_restore():
     readme_cn_text = (repo_root / 'README_CN.md').read_text(encoding='utf-8')
     readme_en_text = (repo_root / 'README_EN.md').read_text(encoding='utf-8')
 
-    assert 'export' in readme_text
-    assert 'import' in readme_text
-    assert '--clean' in readme_text
+    assert 'README_EN.md' in readme_text
+    assert 'README_CN.md' in readme_text
     assert '新设备' in readme_cn_text
     assert '导入前备份' in readme_cn_text
     assert '--clean' in readme_cn_text
@@ -57,9 +56,11 @@ def test_skill_declares_working_buffer_as_only_short_term_scratchpad():
 
 def test_readmes_document_memory_layers_and_lookup_order():
     repo_root = Path(__file__).resolve().parents[1]
-    readme_paths = ['README.md', 'README_CN.md', 'README_EN.md']
+    readme_text = (repo_root / 'README.md').read_text(encoding='utf-8')
+    assert 'MEMORY.md' in readme_text
+    assert 'memory/' in readme_text
 
-    for path in readme_paths:
+    for path in ['README_CN.md', 'README_EN.md']:
         text = (repo_root / path).read_text(encoding='utf-8')
         assert 'MEMORY.md' in text
         assert 'memory/' in text
@@ -70,13 +71,31 @@ def test_readmes_document_memory_layers_and_lookup_order():
     assert '检索顺序' in readme_cn_text
 
 
-def test_readme_documents_memory_workflow_examples():
+def test_root_readme_is_navigation_hub():
     repo_root = Path(__file__).resolve().parents[1]
     readme_text = (repo_root / 'README.md').read_text(encoding='utf-8')
 
+    assert '## Start Here' in readme_text
+    assert '## Navigation' in readme_text
+    assert 'README_EN.md' in readme_text
+    assert 'README_CN.md' in readme_text
+    assert 'INSTALL.md' in readme_text
+    assert 'SKILL.md' in readme_text
+    assert 'OpenViking is an optional enhancement' in readme_text
+    assert 'dreaming' in readme_text
+    assert 'local recovery layer' in readme_text
+    assert 'MEMORY.md' in readme_text
+    assert 'memory/' in readme_text
+    assert 'templates/OBSIDIAN-NOTE.md' in readme_text
+
+
+def test_readmes_document_memory_workflow_examples():
+    repo_root = Path(__file__).resolve().parents[1]
+    readme_text = (repo_root / 'README_EN.md').read_text(encoding='utf-8')
+
     assert 'First-time workspace bootstrap' in readme_text
     assert 'End-of-task memory capture' in readme_text
-    assert 'Distill a daily note into `MEMORY.md`' in readme_text
+    assert 'MEMORY.md' in readme_text
     assert '### Workflow examples' in readme_text
     assert '### Report examples' in readme_text
     assert 'Maintenance report command' in readme_text
@@ -111,7 +130,7 @@ def test_bilingual_readmes_cover_examples_and_report():
 
     assert '首次引导' in readme_cn_text
     assert '任务结束记忆捕获' in readme_cn_text
-    assert '每日笔记蒸馏' in readme_cn_text
+    assert 'MEMORY.md' in readme_cn_text
     assert '### 工作流示例' in readme_cn_text
     assert '### 报告示例' in readme_cn_text
     assert '维护报告' in readme_cn_text
@@ -133,12 +152,12 @@ def test_bilingual_readmes_cover_examples_and_report():
     assert 'Syncthing' in readme_cn_text
     assert 'iCloud' in readme_cn_text
 
-    assert 'first-time workspace bootstrap' in readme_en_text
-    assert 'end-of-task memory capture' in readme_en_text
-    assert 'daily note distillation' in readme_en_text
+    assert 'First-time workspace bootstrap' in readme_en_text
+    assert 'End-of-task memory capture' in readme_en_text
+    assert 'MEMORY.md' in readme_en_text
     assert '### Workflow examples' in readme_en_text
     assert '### Report examples' in readme_en_text
-    assert 'maintenance report command' in readme_en_text
+    assert 'Maintenance report command' in readme_en_text
     assert 'session-start' in readme_en_text
     assert 'doctor' in readme_en_text
     assert 'distill' in readme_en_text
@@ -197,13 +216,9 @@ def test_readmes_document_compatibility_and_post_install_self_check():
     readme_cn_text = (repo_root / 'README_CN.md').read_text(encoding='utf-8')
     readme_en_text = (repo_root / 'README_EN.md').read_text(encoding='utf-8')
 
-    assert '## OpenClaw compatibility' in readme_text
-    assert '2026.4.11' in readme_text
-    assert '## Post-install self-check' in readme_text
-    assert 'python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace' in readme_text
-    assert 'python3 scripts/memory_capture.py session-start --workspace /path/to/workspace' in readme_text
-    assert 'python3 scripts/memory_capture.py distill --workspace /path/to/workspace' in readme_text
-    assert 'python3 scripts/memory_capture.py apply --workspace /path/to/workspace' in readme_text
+    assert 'Canonical OpenClaw skill id' in readme_text
+    assert 'README_EN.md' in readme_text
+    assert 'INSTALL.md' in readme_text
 
     assert '## OpenClaw 兼容说明' in readme_cn_text
     assert '2026.4.11' in readme_cn_text

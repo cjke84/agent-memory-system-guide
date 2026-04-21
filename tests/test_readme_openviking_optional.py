@@ -6,4 +6,4 @@ def test_readme_mentions_openviking_optional():
     readme_text = (repo_root / 'README.md').read_text(encoding='utf-8')
     assert 'templates/OBSIDIAN-NOTE.md' in readme_text
     assert 'OpenViking is an optional enhancement' in readme_text
-    assert 'not required for the core workflow' in readme_text
+    assert 'not a hard dependency' in readme_text

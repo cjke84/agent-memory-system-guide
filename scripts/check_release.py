@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
@@ -11,6 +12,8 @@ from pathlib import Path
 
 
 REPO_FILES_WITH_VERSION = ("README.md", "README_CN.md", "README_EN.md", "INSTALL.md")
+FRONTMATTER_PATTERN = re.compile(r"\A---\n(?P<body>.*?)\n---(?:\n|\Z)", re.DOTALL)
+FRONTMATTER_LINE_PATTERN = re.compile(r"^(?P<key>[A-Za-z0-9_-]+):[ \t]*(?P<value>.*)$")
 
 
 def repo_root() -> Path:
@@ -26,16 +29,25 @@ def ensure(condition: bool, message: str) -> None:
         raise SystemExit(message)
 
 
+def extract_frontmatter_block(skill_text: str) -> str:
+    match = FRONTMATTER_PATTERN.match(skill_text)
+    ensure(match is not None, "SKILL.md is missing frontmatter.")
+    return match.group("body")
+
+
+def parse_frontmatter(frontmatter_text: str) -> dict[str, str]:
+    fields: dict[str, str] = {}
+    for line in frontmatter_text.splitlines():
+        ensure(line.strip(), "SKILL.md frontmatter contains an empty line.")
+        match = FRONTMATTER_LINE_PATTERN.match(line)
+        ensure(match is not None, f"SKILL.md frontmatter has an invalid line: {line!r}")
+        fields[match.group("key")] = match.group("value").strip()
+    return fields
+
+
 def read_frontmatter(root: Path) -> dict[str, str]:
     skill_text = (root / "SKILL.md").read_text(encoding="utf-8")
-    match = re.match(r"^---\n(.*?)\n---\n", skill_text, re.DOTALL)
-    ensure(match is not None, "SKILL.md is missing frontmatter.")
-
-    fields: dict[str, str] = {}
-    for line in match.group(1).splitlines():
-        key, _, value = line.partition(":")
-        fields[key.strip()] = value.strip()
-    return fields
+    return parse_frontmatter(extract_frontmatter_block(skill_text))
 
 
 def check_versions(root: Path, manifest: dict) -> None:
@@ -54,7 +66,12 @@ def check_skill_frontmatter(root: Path) -> None:
     ensure("Use when" in fields.get("description", ""), "SKILL.md description should follow the OpenClaw skill format.")
     ensure(fields.get("homepage") == "https://github.com/cjke84/agent-memory-system-guide", "SKILL.md homepage is missing or incorrect.")
     ensure(fields.get("user-invocable") == "true", "SKILL.md should expose user-invocable: true.")
-    ensure("metadata" in fields and '"openclaw"' in fields["metadata"], "SKILL.md metadata.openclaw is missing.")
+    ensure("metadata" in fields, "SKILL.md metadata is missing.")
+    try:
+        metadata = json.loads(fields["metadata"])
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"SKILL.md metadata must be valid JSON: {exc}") from exc
+    ensure("openclaw" in metadata, "SKILL.md metadata.openclaw is missing.")
 
 
 def run_pytest(root: Path) -> None:

@@ -26,3 +26,11 @@ def test_install_documents_post_install_self_check():
     assert 'memory_capture.py bootstrap' in install_text
     assert 'SESSION-STATE.md' in install_text
     assert 'working-buffer.md' in install_text
+    assert 'Detailed workflow docs' in install_text
+    assert 'README_EN.md' in install_text
+    assert 'README_CN.md' in install_text
+    assert 'session-start' in install_text
+    assert 'report' in install_text
+    assert 'doctor' in install_text
+    assert 'distill' in install_text
+    assert 'apply' in install_text

@@ -20,7 +20,14 @@ After install, use this lightweight self-check:
 2. Run `python3 scripts/memory_capture.py bootstrap --workspace /path/to/workspace`.
 3. Confirm the workspace now has `SESSION-STATE.md`, `working-buffer.md`, and `memory-capture.md`.
 4. Optionally run `python3 scripts/memory_capture.py session-start --workspace /path/to/workspace` to initialize recovery metadata from turn 1.
-5. Optionally run `python3 scripts/memory_capture.py distill --workspace /path/to/workspace` and `python3 scripts/memory_capture.py apply --workspace /path/to/workspace` to verify the full capture-to-memory loop.
+5. If you want to verify the full capture-to-memory loop, use the detailed workflow docs below instead of duplicating the whole command reference here.
+
+## Detailed workflow docs
+
+- English workflow and command reference: [README_EN.md](README_EN.md)
+- 中文工作流与命令说明: [README_CN.md](README_CN.md)
+- For the full command flow, see the sections covering `session-start`, `report`, `doctor`, `distill`, and `apply`.
+- For vault layout, plugins, sync trade-offs, and scheduled maintenance, use the Obsidian setup sections in the READMEs.
 
 ## Manual / agent-assisted install
 
